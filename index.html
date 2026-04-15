@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chordscribe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body class="bg-zinc-950 text-white">
+    <div class="max-w-5xl mx-auto p-8">
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold mb-3">🎸 Chordscribe</h1>
+            <p class="text-emerald-400 text-xl">Upload any song → Get lyrics, chords, MIDI & stems</p>
+        </div>
+
+        <!-- Simple Pricing (no Paddle for now) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-zinc-900 rounded-3xl p-8 text-center">
+                <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
+                <p class="text-5xl font-bold my-4">5 uses</p>
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 py-5 rounded-3xl text-xl font-semibold">
+                    Buy $5 Pack
+                </button>
+            </div>
+            <div class="bg-zinc-900 rounded-3xl p-8 text-center border-2 border-emerald-500">
+                <h3 class="text-2xl font-semibold">$9.99 / month</h3>
+                <p class="text-emerald-400">Unlimited Access</p>
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 py-5 rounded-3xl text-xl font-semibold mt-6">
+                    Subscribe Monthly
+                </button>
+            </div>
+            <div class="bg-zinc-900 rounded-3xl p-8 text-center">
+                <h3 class="text-2xl font-semibold">$49 Lifetime</h3>
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
+                        class="w-full bg-emerald-600 hover:bg-emerald-700 py-5 rounded-3xl text-xl font-semibold mt-6">
+                    Buy Lifetime
+                </button>
+            </div>
+        </div>
+
+        <!-- Upload Area -->
+        <div class="bg-zinc-900 rounded-3xl p-16 text-center">
+            <i class="fa-solid fa-cloud-upload-alt text-8xl text-emerald-400 mb-8"></i>
+            <p class="text-3xl font-medium mb-4">Drop your MP3 or WAV here</p>
+            <p class="text-zinc-400 mb-10">Max 6 minutes</p>
+            
+            <input type="file" id="file-input" accept="audio/*" class="hidden" onchange="handleFile(event)">
+            <button onclick="document.getElementById('file-input').click()" 
+                    class="bg-emerald-600 hover:bg-emerald-700 px-12 py-5 rounded-3xl text-xl font-semibold">
+                Choose Audio File
+            </button>
+        </div>
+
+        <div id="file-info" class="hidden mt-8 bg-zinc-800 rounded-3xl p-8">
+            <div class="flex justify-between items-center mb-6">
+                <p class="font-medium text-lg" id="filename"></p>
+                <button onclick="startProcessing()" id="process-btn"
+                        class="bg-emerald-500 hover:bg-emerald-600 px-10 py-4 rounded-3xl font-semibold">
+                    Process Song
+                </button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div id="results" class="hidden mt-8 bg-zinc-900 rounded-3xl p-8">
+            <h3 class="text-2xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
+            <p id="song-name" class="text-zinc-400 mb-8"></p>
+
+            <div class="bg-zinc-800 rounded-2xl p-6 mb-8">
+                <h4 class="font-medium mb-4 text-emerald-400">Lyrics (Simulated)</h4>
+                <div class="text-left font-mono text-sm leading-relaxed bg-black p-6 rounded-xl">
+                    Oh the waves are calling<br>
+                    Under the moonlight we fall<br>
+                    Aawitan kita ama<br>
+                    In this island dream we call home
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div onclick="fakeDownload('PDF')" class="bg-zinc-800 hover:bg-zinc-700 p-6 rounded-2xl text-center cursor-pointer">
+                    <i class="fa-solid fa-file-pdf text-5xl text-red-400 mb-3"></i>
+                    <p class="font-medium">Download PDF</p>
+                </div>
+                <div onclick="fakeDownload('MIDI')" class="bg-zinc-800 hover:bg-zinc-700 p-6 rounded-2xl text-center cursor-pointer">
+                    <i class="fa-solid fa-music text-5xl text-amber-400 mb-3"></i>
+                    <p class="font-medium">Download MIDI</p>
+                </div>
+            </div>
+
+            <div class="bg-zinc-800 rounded-2xl p-6">
+                <h4 class="font-medium mb-4 text-emerald-400">Stem Separation</h4>
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                    <div onclick="fakeDownload('Vocals')" class="bg-zinc-700 hover:bg-zinc-600 p-4 rounded-xl cursor-pointer">Vocals</div>
+                    <div onclick="fakeDownload('Drums')" class="bg-zinc-700 hover:bg-zinc-600 p-4 rounded-xl cursor-pointer">Drums</div>
+                    <div onclick="fakeDownload('Guitar')" class="bg-zinc-700 hover:bg-zinc-600 p-4 rounded-xl cursor-pointer">Guitar</div>
+                    <div onclick="fakeDownload('Bass')" class="bg-zinc-700 hover:bg-zinc-600 p-4 rounded-xl cursor-pointer">Bass</div>
+                    <div onclick="fakeDownload('Other')" class="bg-zinc-700 hover:bg-zinc-600 p-4 rounded-xl col-span-2">Other Instruments</div>
+                </div>
+            </div>
+
+            <button onclick="resetApp()" class="mt-10 w-full bg-zinc-700 hover:bg-zinc-600 py-4 rounded-3xl text-lg">
+                Process Another Song
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('file-info').classList.remove('hidden');
+                document.getElementById('filename').textContent = file.name;
+                document.getElementById('results').classList.add('hidden');
+            }
+        }
+
+        function startProcessing() {
+            const btn = document.getElementById('process-btn');
+            const originalText = btn.textContent;
+            btn.textContent = "Processing...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const filename = document.getElementById('filename').textContent;
+                document.getElementById('song-name').textContent = "Song: " + filename;
+                document.getElementById('results').classList.remove('hidden');
+                document.getElementById('file-info').classList.add('hidden');
+                
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }, 1600);
+        }
+
+        function fakeDownload(type) {
+            alert(`✅ Downloading ${type} file...\n\n(This is a simulation for now.)`);
+        }
+
+        function resetApp() {
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('file-info').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+        }
+    </script>
+</body>
+</html>
