@@ -3,3 +3,7 @@ Flask-CORS
 gunicorn
 faster-whisper
 reportlab
+demucs
+basic-pitch
+torchaudio
+torch
