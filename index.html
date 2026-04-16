@@ -19,6 +19,9 @@
             font-weight: 700;
             font-size: 1.35rem;
         }
+        #transcription-output {
+            line-height: 1.75;
+        }
     </style>
 </head>
 <body class="text-white min-h-screen">
@@ -103,7 +106,7 @@
             <!-- Lyrics with Chords -->
             <div class="mb-12">
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics with Chords</h4>
-                <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700 whitespace-pre-wrap">
+                <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700">
                 </div>
             </div>
 
@@ -190,7 +193,7 @@
                 if (data.success) {
                     document.getElementById('song-name').textContent = "Song: " + file.name;
                     
-                    // Improved chord + lyrics display
+                    // Single-spaced lyrics with chords
                     let html = "";
                     const lines = data.lyrics.split('\n');
                     const commonChords = ["[C]", "[Am]", "[F]", "[G]", "[Em]", "[Dm]", "[C]", "[G]"];
@@ -200,7 +203,7 @@
                         if (line.trim()) {
                             const chord = commonChords[chordIndex % commonChords.length];
                             html += `
-                                <div class="mb-8">
+                                <div class="mb-6">
                                     <span class="chord">${chord}</span>
                                     <span class="ml-6">${line.trim()}</span>
                                 </div>`;
