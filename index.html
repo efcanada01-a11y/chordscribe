@@ -117,7 +117,7 @@
                     <p class="font-semibold text-xl">Download PDF</p>
                     <p class="text-sm text-emerald-400 mt-1">(Lyrics + Chords)</p>
                 </div>
-                <div onclick="fakeDownload('MIDI')" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
+                <div onclick="downloadRealMIDI()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download MIDI</p>
                 </div>
@@ -214,8 +214,8 @@
                     document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
                     document.getElementById('results').classList.remove('hidden');
                     
-                    // Store PDF filename for real download
                     window.currentPDF = data.pdf_filename;
+                    window.currentMIDI = data.midi_filename;
                 } else {
                     alert("Error: " + (data.error || "Unknown error"));
                 }
@@ -236,6 +236,14 @@
             }
         }
 
+        function downloadRealMIDI() {
+            if (window.currentMIDI) {
+                window.location.href = `/download/midi/${window.currentMIDI}`;
+            } else {
+                alert("Please process a song first.");
+            }
+        }
+
         function fakeDownload(type) {
             alert(`✅ Downloading ${type} file...\n\n(This feature is coming soon in full version.)`);
         }
@@ -245,6 +253,7 @@
             document.getElementById('file-info').classList.add('hidden');
             document.getElementById('file-input').value = '';
             window.currentPDF = null;
+            window.currentMIDI = null;
         }
     </script>
 </body>
