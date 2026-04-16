@@ -7,7 +7,7 @@ import uuid
 app = Flask(__name__)
 CORS(app)
 
-# Load the Whisper model once when the app starts (small model works well on Railway)
+# Use a slightly better setting for music/songs
 whisper_model = WhisperModel("small", device="cpu", compute_type="int8")
 
 UPLOAD_FOLDER = "uploads"
@@ -26,24 +26,28 @@ def transcribe():
     if file.filename == '':
         return jsonify({"success": False, "error": "No selected file"})
     
-    # Save uploaded file temporarily
     filename = str(uuid.uuid4()) + "_" + file.filename
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
     
     try:
-        # Real transcription using faster-whisper
+        # Better settings for songs (disable aggressive VAD, allow more segments)
         segments, info = whisper_model.transcribe(
             filepath, 
             beam_size=5, 
             language="en", 
-            vad_filter=True
+            vad_filter=False,           # Turn off strict VAD for music
+            word_timestamps=False
         )
         
-        # Combine all segments into clean lyrics
-        lyrics = " ".join([segment.text.strip() for segment in segments])
+        lyrics_list = [segment.text.strip() for segment in segments if segment.text.strip()]
+        lyrics = " ".join(lyrics_list)
         
-        # Clean up the temporary file
+        # Fallback message if nothing detected
+        if not lyrics:
+            lyrics = "No clear vocals detected in this audio. Try a song with louder singing or clearer vocals."
+        
+        # Clean up
         if os.path.exists(filepath):
             os.remove(filepath)
         
@@ -54,7 +58,6 @@ def transcribe():
         })
         
     except Exception as e:
-        # Clean up file if error occurs
         if os.path.exists(filepath):
             os.remove(filepath)
         return jsonify({"success": False, "error": str(e)})
