@@ -14,6 +14,11 @@
             font-size: 3.5rem;
             filter: drop-shadow(0 0 15px #10b981);
         }
+        .chord {
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 1.35rem;
+        }
     </style>
 </head>
 <body class="text-white min-h-screen">
@@ -53,7 +58,7 @@
             </div>
         </div>
 
-        <!-- Upload Area -->
+        <!-- Upload -->
         <div class="bg-zinc-900/70 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
             <i class="fa-solid fa-cloud-arrow-up text-8xl text-emerald-400 mb-8"></i>
             <p class="text-4xl font-medium mb-3">Drop your song here</p>
@@ -76,17 +81,17 @@
             </div>
         </div>
 
-        <!-- Progress Bar -->
+        <!-- Progress -->
         <div id="progress-container" class="hidden mt-8">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
                 <div class="flex justify-between text-sm mb-3">
-                    <span class="text-emerald-400">Processing with AI...</span>
+                    <span class="text-emerald-400">AI is working...</span>
                     <span id="progress-percent">0%</span>
                 </div>
                 <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
                     <div id="progress-bar" class="h-3 bg-gradient-to-r from-emerald-400 to-teal-400 w-0 transition-all duration-300"></div>
                 </div>
-                <p id="progress-text" class="text-center text-zinc-400 mt-4 text-sm">Transcribing lyrics...</p>
+                <p id="progress-text" class="text-center text-zinc-400 mt-4 text-sm">Transcribing + detecting chords...</p>
             </div>
         </div>
 
@@ -95,9 +100,9 @@
             <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
             <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
 
-            <!-- Lyrics -->
+            <!-- Lyrics with Chords -->
             <div class="mb-12">
-                <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics (Real AI Transcription)</h4>
+                <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics with Chords</h4>
                 <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700 whitespace-pre-wrap">
                 </div>
             </div>
@@ -136,78 +141,4 @@
         function handleFile(event) {
             const file = event.target.files[0];
             if (file) {
-                document.getElementById('file-info').classList.remove('hidden');
-                document.getElementById('filename').textContent = file.name;
-                document.getElementById('results').classList.add('hidden');
-                document.getElementById('progress-container').classList.add('hidden');
-            }
-        }
-
-        async function startProcessing() {
-            const btn = document.getElementById('process-btn');
-            const originalText = btn.textContent;
-            btn.textContent = "Processing with AI...";
-            btn.disabled = true;
-
-            document.getElementById('progress-container').classList.remove('hidden');
-            document.getElementById('file-info').classList.add('hidden');
-
-            const fileInput = document.getElementById('file-input');
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            // Progress simulation (realistic)
-            let progress = 0;
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-            const progressPercent = document.getElementById('progress-percent');
-
-            const interval = setInterval(() => {
-                progress += Math.random() * 18 + 8;
-                if (progress > 92) progress = 92;
-                progressBar.style.width = progress + '%';
-                progressPercent.textContent = Math.floor(progress) + '%';
-            }, 280);
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const res = await fetch('/api/transcribe', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-
-                clearInterval(interval);
-                progressBar.style.width = '100%';
-                progressPercent.textContent = '100%';
-
-                if (data.success) {
-                    document.getElementById('song-name').textContent = "Song: " + file.name;
-                    document.getElementById('transcription-output').innerHTML = data.lyrics.replace(/\n/g, '<br>') || "No lyrics detected.";
-                    document.getElementById('results').classList.remove('hidden');
-                } else {
-                    alert("Error: " + (data.error || "Unknown error"));
-                }
-            } catch (err) {
-                alert("Connection error: " + err.message);
-            }
-
-            btn.textContent = originalText;
-            btn.disabled = false;
-            document.getElementById('progress-container').classList.add('hidden');
-        }
-
-        function fakeDownload(type) {
-            alert(`✅ Downloading ${type} file...\n\n(This feature is coming soon in full version.)`);
-        }
-
-        function resetApp() {
-            document.getElementById('results').classList.add('hidden');
-            document.getElementById('file-info').classList.add('hidden');
-            document.getElementById('file-input').value = '';
-        }
-    </script>
-</body>
-</html>
+                document.getElementById('file-info
