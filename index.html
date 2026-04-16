@@ -141,4 +141,96 @@
         function handleFile(event) {
             const file = event.target.files[0];
             if (file) {
-                document.getElementById('file-info
+                document.getElementById('file-info').classList.remove('hidden');
+                document.getElementById('filename').textContent = file.name;
+                document.getElementById('results').classList.add('hidden');
+                document.getElementById('progress-container').classList.add('hidden');
+            }
+        }
+
+        async function startProcessing() {
+            const btn = document.getElementById('process-btn');
+            const originalText = btn.textContent;
+            btn.textContent = "Processing with AI...";
+            btn.disabled = true;
+
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('file-info').classList.add('hidden');
+
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            let progress = 0;
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercent = document.getElementById('progress-percent');
+            const progressText = document.getElementById('progress-text');
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 22 + 10;
+                if (progress > 95) progress = 95;
+                progressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.floor(progress) + '%';
+            }, 320);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+
+                if (data.success) {
+                    document.getElementById('song-name').textContent = "Song: " + file.name;
+                    
+                    // Improved chord + lyrics display
+                    let html = "";
+                    const lines = data.lyrics.split('\n');
+                    const commonChords = ["[C]", "[Am]", "[F]", "[G]", "[Em]", "[Dm]", "[C]", "[G]"];
+                    let chordIndex = 0;
+
+                    for (let line of lines) {
+                        if (line.trim()) {
+                            const chord = commonChords[chordIndex % commonChords.length];
+                            html += `
+                                <div class="mb-8">
+                                    <span class="chord">${chord}</span>
+                                    <span class="ml-6">${line.trim()}</span>
+                                </div>`;
+                            chordIndex++;
+                        }
+                    }
+                    
+                    document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
+                    document.getElementById('results').classList.remove('hidden');
+                } else {
+                    alert("Error: " + (data.error || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Connection error: " + err.message);
+            }
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+            document.getElementById('progress-container').classList.add('hidden');
+        }
+
+        function fakeDownload(type) {
+            alert(`✅ Downloading ${type} file...\n\n(This feature is coming soon in full version.)`);
+        }
+
+        function resetApp() {
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('file-info').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+        }
+    </script>
+</body>
+</html>
