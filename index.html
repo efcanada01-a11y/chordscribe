@@ -112,9 +112,10 @@
 
             <!-- Downloads -->
             <div class="grid grid-cols-2 gap-6 mb-12">
-                <div onclick="fakeDownload('PDF')" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
+                <div onclick="downloadPDF()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-file-pdf text-7xl text-red-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download PDF</p>
+                    <p class="text-sm text-emerald-400 mt-1">(Lyrics + Chords)</p>
                 </div>
                 <div onclick="fakeDownload('MIDI')" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
@@ -129,111 +130,4 @@
                     <div onclick="fakeDownload('Vocals')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Vocals</div>
                     <div onclick="fakeDownload('Drums')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Drums</div>
                     <div onclick="fakeDownload('Guitar')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Guitar</div>
-                    <div onclick="fakeDownload('Bass')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Bass</div>
-                    <div onclick="fakeDownload('Other')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition col-span-2 md:col-span-1">Other</div>
-                </div>
-            </div>
-
-            <button onclick="resetApp()" class="mt-16 w-full bg-zinc-800 hover:bg-zinc-700 py-6 rounded-3xl text-xl font-medium transition">
-                Process Another Song
-            </button>
-        </div>
-    </div>
-
-    <script>
-        function handleFile(event) {
-            const file = event.target.files[0];
-            if (file) {
-                document.getElementById('file-info').classList.remove('hidden');
-                document.getElementById('filename').textContent = file.name;
-                document.getElementById('results').classList.add('hidden');
-                document.getElementById('progress-container').classList.add('hidden');
-            }
-        }
-
-        async function startProcessing() {
-            const btn = document.getElementById('process-btn');
-            const originalText = btn.textContent;
-            btn.textContent = "Processing with AI...";
-            btn.disabled = true;
-
-            document.getElementById('progress-container').classList.remove('hidden');
-            document.getElementById('file-info').classList.add('hidden');
-
-            const fileInput = document.getElementById('file-input');
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            let progress = 0;
-            const progressBar = document.getElementById('progress-bar');
-            const progressPercent = document.getElementById('progress-percent');
-            const progressText = document.getElementById('progress-text');
-
-            const interval = setInterval(() => {
-                progress += Math.random() * 22 + 10;
-                if (progress > 95) progress = 95;
-                progressBar.style.width = progress + '%';
-                progressPercent.textContent = Math.floor(progress) + '%';
-            }, 320);
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const res = await fetch('/api/transcribe', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-
-                clearInterval(interval);
-                progressBar.style.width = '100%';
-                progressPercent.textContent = '100%';
-
-                if (data.success) {
-                    document.getElementById('song-name').textContent = "Song: " + file.name;
-                    
-                    // Single-spaced lyrics with chords
-                    let html = "";
-                    const lines = data.lyrics.split('\n');
-                    const commonChords = ["[C]", "[Am]", "[F]", "[G]", "[Em]", "[Dm]", "[C]", "[G]"];
-                    let chordIndex = 0;
-
-                    for (let line of lines) {
-                        if (line.trim()) {
-                            const chord = commonChords[chordIndex % commonChords.length];
-                            html += `
-                                <div class="mb-6">
-                                    <span class="chord">${chord}</span>
-                                    <span class="ml-6">${line.trim()}</span>
-                                </div>`;
-                            chordIndex++;
-                        }
-                    }
-                    
-                    document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
-                    document.getElementById('results').classList.remove('hidden');
-                } else {
-                    alert("Error: " + (data.error || "Unknown error"));
-                }
-            } catch (err) {
-                alert("Connection error: " + err.message);
-            }
-
-            btn.textContent = originalText;
-            btn.disabled = false;
-            document.getElementById('progress-container').classList.add('hidden');
-        }
-
-        function fakeDownload(type) {
-            alert(`✅ Downloading ${type} file...\n\n(This feature is coming soon in full version.)`);
-        }
-
-        function resetApp() {
-            document.getElementById('results').classList.add('hidden');
-            document.getElementById('file-info').classList.add('hidden');
-            document.getElementById('file-input').value = '';
-        }
-    </script>
-</body>
-</html>
+                    <div onclick="fakeDownload('Bass')" class="bg-zinc-900 hover:bg-emerald-900/30
