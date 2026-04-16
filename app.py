@@ -7,7 +7,7 @@ import uuid
 app = Flask(__name__)
 CORS(app)
 
-# Load the model once when the app starts (small model for speed on Railway)
+# Load the Whisper model once when the app starts (small model works well on Railway)
 whisper_model = WhisperModel("small", device="cpu", compute_type="int8")
 
 UPLOAD_FOLDER = "uploads"
@@ -26,27 +26,38 @@ def transcribe():
     if file.filename == '':
         return jsonify({"success": False, "error": "No selected file"})
     
-    # Save the file temporarily
+    # Save uploaded file temporarily
     filename = str(uuid.uuid4()) + "_" + file.filename
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
     
     try:
-        # Real transcription with faster-whisper
-        segments, info = whisper_model.transcribe(filepath, beam_size=5, language="en")
-        lyrics = " ".join([segment.text for segment in segments])
+        # Real transcription using faster-whisper
+        segments, info = whisper_model.transcribe(
+            filepath, 
+            beam_size=5, 
+            language="en", 
+            vad_filter=True
+        )
         
-        # Clean up the file
+        # Combine all segments into clean lyrics
+        lyrics = " ".join([segment.text.strip() for segment in segments])
+        
+        # Clean up the temporary file
         if os.path.exists(filepath):
             os.remove(filepath)
         
         return jsonify({
             "success": True,
-            "lyrics": lyrics.strip(),
+            "lyrics": lyrics,
             "detected_language": info.language
         })
+        
     except Exception as e:
+        # Clean up file if error occurs
+        if os.path.exists(filepath):
+            os.remove(filepath)
         return jsonify({"success": False, "error": str(e)})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=False)
