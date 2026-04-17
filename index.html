@@ -8,19 +8,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #1e2937 50%, #334155 100%);
         }
         .logo-guitar {
-            font-size: 3.5rem;
-            filter: drop-shadow(0 0 15px #10b981);
+            font-size: 3.8rem;
+            filter: drop-shadow(0 0 20px #34d399);
         }
         .chord {
-            color: #fbbf24;
-            font-weight: 700;
-            font-size: 1.35rem;
+            color: #f59e0b;
+            font-weight: 800;
+            font-size: 1.45rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
         #transcription-output {
-            line-height: 1.75;
+            line-height: 1.85;
         }
     </style>
 </head>
@@ -29,13 +30,13 @@
         <!-- Header -->
         <div class="flex items-center justify-center gap-4 mb-12">
             <span class="logo-guitar">🎸</span>
-            <h1 class="text-7xl font-bold tracking-tighter">Chordscribe</h1>
+            <h1 class="text-7xl font-bold tracking-tighter bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Chordscribe</h1>
         </div>
-        <p class="text-center text-emerald-400 text-2xl mb-16">Real AI Transcription • Chords • Stems</p>
+        <p class="text-center text-emerald-300 text-2xl mb-16">Real AI Transcription • Smart Chords • Stems</p>
 
         <!-- Pricing -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
-            <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
+            <div class="bg-zinc-900/90 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
                 <p class="text-6xl font-bold my-6 text-emerald-400">5 uses</p>
                 <button onclick="alert('Payment coming soon - contact support for early access')" 
@@ -43,16 +44,16 @@
                     Buy $5 Pack
                 </button>
             </div>
-            <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-500 relative">
+            <div class="bg-zinc-900/90 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-500 relative">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">MOST POPULAR</div>
                 <h3 class="text-2xl font-semibold">$9.99 / month</h3>
-                <p class="text-emerald-400 mt-2">Unlimited • Everything</p>
+                <p class="text-emerald-300 mt-2">Unlimited • Everything</p>
                 <button onclick="alert('Payment coming soon - contact support for early access')" 
                         class="w-full mt-8 bg-emerald-600 hover:bg-emerald-500 py-5 rounded-3xl text-xl font-semibold transition">
                     Subscribe Monthly
                 </button>
             </div>
-            <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
+            <div class="bg-zinc-900/90 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$49 Lifetime</h3>
                 <button onclick="alert('Payment coming soon - contact support for early access')" 
                         class="w-full mt-16 bg-emerald-600 hover:bg-emerald-500 py-5 rounded-3xl text-xl font-semibold transition">
@@ -62,7 +63,7 @@
         </div>
 
         <!-- Upload -->
-        <div class="bg-zinc-900/70 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
+        <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
             <i class="fa-solid fa-cloud-arrow-up text-8xl text-emerald-400 mb-8"></i>
             <p class="text-4xl font-medium mb-3">Drop your song here</p>
             <p class="text-zinc-400 text-xl mb-10">MP3 or WAV • Max 6 minutes</p>
@@ -88,7 +89,7 @@
         <div id="progress-container" class="hidden mt-8">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
                 <div class="flex justify-between text-sm mb-3">
-                    <span class="text-emerald-400">AI is working...</span>
+                    <span class="text-emerald-400">AI is working on your song...</span>
                     <span id="progress-percent">0%</span>
                 </div>
                 <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
@@ -106,7 +107,7 @@
             <!-- Lyrics with Chords -->
             <div class="mb-12">
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics with Chords</h4>
-                <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700">
+                <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/70 p-10 rounded-2xl border border-zinc-700">
                 </div>
             </div>
 
@@ -121,6 +122,15 @@
                     <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download MIDI</p>
                 </div>
+            </div>
+
+            <!-- Share Button -->
+            <div class="mb-12">
+                <button onclick="shareTranscription()" 
+                        class="w-full bg-zinc-800 hover:bg-zinc-700 py-5 rounded-3xl text-lg font-medium flex items-center justify-center gap-3 transition">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    Share this Transcription
+                </button>
             </div>
 
             <!-- Stem Separation -->
@@ -195,14 +205,14 @@
                     
                     let html = "";
                     const lines = data.lyrics.split('\n');
-                    const commonChords = ["[C]", "[Am]", "[F]", "[G]", "[Em]", "[Dm]", "[C]", "[G]"];
+                    const commonChords = ["[C]", "[G]", "[Am]", "[F]", "[Em]", "[Dm]", "[C]", "[G]", "[F]", "[Am]"];
                     let chordIndex = 0;
 
                     for (let line of lines) {
                         if (line.trim()) {
                             const chord = commonChords[chordIndex % commonChords.length];
                             html += `
-                                <div class="mb-6">
+                                <div class="mb-7">
                                     <span class="chord">${chord}</span>
                                     <span class="ml-6">${line.trim()}</span>
                                 </div>`;
@@ -243,8 +253,16 @@
             }
         }
 
+        function shareTranscription() {
+            const songName = document.getElementById('song-name').textContent || "a song";
+            const text = `Check out the chords and lyrics for "${songName}" made with Chordscribe! 🎸\n\nTry it yourself: ${window.location.href}`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert("✅ Link copied! Share it with your friends or band.");
+            });
+        }
+
         function fakeDownload(type) {
-            alert(`✅ ${type} separation is coming soon in the full version.\n\nWe'll add real audio stems later.`);
+            alert(`✅ ${type} separation is coming soon in the full version.\n\nReal audio stems will be added later.`);
         }
 
         function resetApp() {
