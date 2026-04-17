@@ -3,5 +3,3 @@ Flask-CORS
 gunicorn
 faster-whisper
 reportlab
-Flask-JWT-Extended
-Werkzeug
