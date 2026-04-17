@@ -7,6 +7,7 @@ import uuid
 app = Flask(__name__)
 CORS(app)
 
+# Load model
 whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
 
 UPLOAD_FOLDER = "uploads"
@@ -20,25 +21,26 @@ def home():
 def transcribe():
     if 'file' not in request.files:
         return jsonify({"success": False, "error": "No file uploaded"}), 400
-    
+
     file = request.files['file']
     if file.filename == '':
         return jsonify({"success": False, "error": "No selected file"}), 400
-    
+
+    # Save file
     filename = str(uuid.uuid4()) + "_" + file.filename
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(filepath)
-    
+
     try:
         segments, info = whisper_model.transcribe(filepath, beam_size=5, language="en", vad_filter=False)
         lyrics = " ".join([segment.text.strip() for segment in segments if segment.text.strip()])
-        
+
         if os.path.exists(filepath):
             os.remove(filepath)
-        
+
         return jsonify({
             "success": True,
-            "lyrics": lyrics or "No lyrics detected."
+            "lyrics": lyrics or "No lyrics detected in this audio."
         })
     except Exception as e:
         if os.path.exists(filepath):
