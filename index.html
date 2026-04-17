@@ -123,7 +123,7 @@
                 </div>
             </div>
 
-            <!-- Stems -->
+            <!-- Stem Separation -->
             <div>
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation</h4>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -193,7 +193,6 @@
                 if (data.success) {
                     document.getElementById('song-name').textContent = "Song: " + file.name;
                     
-                    // Single-spaced lyrics with chords
                     let html = "";
                     const lines = data.lyrics.split('\n');
                     const commonChords = ["[C]", "[Am]", "[F]", "[G]", "[Em]", "[Dm]", "[C]", "[G]"];
@@ -245,7 +244,7 @@
         }
 
         function fakeDownload(type) {
-            alert(`✅ Downloading ${type} file...\n\n(This feature is coming soon in full version.)`);
+            alert(`✅ ${type} separation is coming soon in the full version.\n\nWe'll add real audio stems later.`);
         }
 
         function resetApp() {
