@@ -75,13 +75,13 @@
         <div id="progress-container" class="hidden mt-8">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
                 <div class="flex justify-between text-sm mb-3">
-                    <span class="text-emerald-400">AI is working on your song...</span>
+                    <span class="text-emerald-400">AI is working...</span>
                     <span id="progress-percent">0%</span>
                 </div>
                 <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
                     <div id="progress-bar" class="h-3 bg-gradient-to-r from-emerald-400 to-teal-400 w-0 transition-all duration-300"></div>
                 </div>
-                <p id="progress-text" class="text-center text-zinc-400 mt-4 text-sm">Transcribing + detecting chords + separating stems...</p>
+                <p id="progress-text" class="text-center text-zinc-400 mt-4 text-sm">Transcribing + detecting chords...</p>
             </div>
         </div>
 
@@ -90,19 +90,16 @@
             <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
             <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
 
-            <!-- Lyrics with Chords -->
             <div class="mb-12">
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics with Chords</h4>
                 <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700">
                 </div>
             </div>
 
-            <!-- Downloads -->
             <div class="grid grid-cols-2 gap-6 mb-10">
                 <div onclick="downloadRealPDF()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-file-pdf text-7xl text-red-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download PDF</p>
-                    <p class="text-sm text-emerald-400 mt-1">(Lyrics + Chords)</p>
                 </div>
                 <div onclick="downloadRealMIDI()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
@@ -110,7 +107,6 @@
                 </div>
             </div>
 
-            <!-- Share -->
             <div class="mb-12">
                 <button onclick="shareTranscription()" 
                         class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 py-6 rounded-3xl text-xl font-semibold transition shadow-lg">
@@ -121,7 +117,7 @@
 
             <!-- Stem Separation -->
             <div>
-                <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation (Separate Tracks)</h4>
+                <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation</h4>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                     <div onclick="downloadStem('Vocals')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Vocals</div>
                     <div onclick="downloadStem('Drums')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Drums</div>
@@ -137,7 +133,7 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
+    <!-- Auth Modal with Opt-in -->
     <div id="auth-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
         <div class="bg-zinc-900 rounded-3xl p-10 w-full max-w-md">
             <h2 id="modal-title" class="text-3xl font-bold mb-8 text-center">Login to Chordscribe</h2>
@@ -148,6 +144,11 @@
                 
                 <input id="password" type="password" placeholder="Password" 
                        class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
+                
+                <label class="flex items-center gap-3 text-sm text-zinc-400">
+                    <input type="checkbox" id="optin" checked class="w-5 h-5 accent-emerald-500">
+                    I agree to receive future offers and updates
+                </label>
                 
                 <button onclick="handleAuth()" 
                         class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">
@@ -187,11 +188,18 @@
 
         function handleAuth() {
             const email = document.getElementById('email').value.trim();
+            const optin = document.getElementById('optin').checked;
+            
             if (!email) {
                 alert("Please enter your email");
                 return;
             }
-            alert(`✅ ${isLoginMode ? 'Logged in' : 'Account created'} as ${email}\n\nUser history and credits are now active.`);
+            
+            const message = isLoginMode 
+                ? `✅ Logged in as ${email}` 
+                : `✅ Account created for ${email}\n\nOpt-in for offers: ${optin ? 'Yes' : 'No'}`;
+            
+            alert(message);
             hideAuthModal();
         }
 
@@ -268,3 +276,53 @@
                     
                     window.currentPDF = data.pdf_filename;
                     window.currentMIDI = data.midi_filename;
+                } else {
+                    alert("Error: " + (data.error || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Connection error: " + err.message);
+            }
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+            document.getElementById('progress-container').classList.add('hidden');
+        }
+
+        function downloadRealPDF() {
+            if (window.currentPDF) {
+                window.location.href = `/download/pdf/${window.currentPDF}`;
+            } else {
+                alert("Please process a song first.");
+            }
+        }
+
+        function downloadRealMIDI() {
+            if (window.currentMIDI) {
+                window.location.href = `/download/midi/${window.currentMIDI}`;
+            } else {
+                alert("Please process a song first.");
+            }
+        }
+
+        function downloadStem(stemType) {
+            alert(`✅ Downloading ${stemType} stem file...\n\n(Real audio stems coming in full version)`);
+        }
+
+        function shareTranscription() {
+            const songName = document.getElementById('song-name').textContent.replace("Song: ", "") || "this song";
+            const shareText = `Check out the chords & lyrics for "${songName}" made with Chordscribe! 🎸\n\nTry it yourself: ${window.location.href}`;
+            navigator.clipboard.writeText(shareText).then(() => {
+                alert("✅ Copied to clipboard!\n\nShare with your friends.");
+            });
+        }
+
+        function resetApp() {
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('file-info').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+            window.currentPDF = null;
+            window.currentMIDI = null;
+        }
+    </script>
+</body>
+</html>
