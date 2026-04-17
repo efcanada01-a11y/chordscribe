@@ -7,7 +7,6 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import simpleSplit
 import uuid
 import gc
-import subprocess
 
 app = Flask(__name__)
 CORS(app)
@@ -16,10 +15,9 @@ whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
 
 UPLOAD_FOLDER = "uploads"
 PDF_FOLDER = "pdfs"
-STEMS_FOLDER = "stems"
 MIDI_FOLDER = "midi"
 
-for folder in [UPLOAD_FOLDER, PDF_FOLDER, STEMS_FOLDER, MIDI_FOLDER]:
+for folder in [UPLOAD_FOLDER, PDF_FOLDER, MIDI_FOLDER]:
     os.makedirs(folder, exist_ok=True)
 
 @app.route('/')
@@ -40,8 +38,13 @@ def transcribe():
     file.save(filepath)
     
     try:
-        # Transcription
-        segments, info = whisper_model.transcribe(filepath, beam_size=5, language="en", vad_filter=False)
+        segments, info = whisper_model.transcribe(
+            filepath, 
+            beam_size=5, 
+            language="en", 
+            vad_filter=False
+        )
+        
         lyrics_list = [segment.text.strip() for segment in segments if segment.text.strip()]
         lyrics = "\n".join(lyrics_list) if lyrics_list else "No clear vocals detected."
 
@@ -50,21 +53,11 @@ def transcribe():
         pdf_path = os.path.join(PDF_FOLDER, pdf_filename)
         generate_pdf(pdf_path, file.filename, lyrics)
 
-        # Generate Stems (using demucs - lightweight on CPU)
-        stem_folder = os.path.join(STEMS_FOLDER, str(uuid.uuid4()))
-        os.makedirs(stem_folder, exist_ok=True)
-        try:
-            subprocess.run(["demucs", "--two-stems=vocals", "-o", stem_folder, filepath], 
-                         capture_output=True, timeout=180)
-        except:
-            pass  # fallback if demucs fails
-
-        # Generate MIDI (basic placeholder for now)
+        # Generate simple MIDI
         midi_filename = f"{uuid.uuid4()}.mid"
         midi_path = os.path.join(MIDI_FOLDER, midi_filename)
         generate_simple_midi(midi_path)
 
-        # Clean up
         if os.path.exists(filepath):
             os.remove(filepath)
         gc.collect()
@@ -73,8 +66,7 @@ def transcribe():
             "success": True,
             "lyrics": lyrics,
             "pdf_filename": pdf_filename,
-            "midi_filename": midi_filename,
-            "stem_folder": os.path.basename(stem_folder)
+            "midi_filename": midi_filename
         })
         
     except Exception as e:
@@ -116,9 +108,9 @@ def generate_pdf(pdf_path, song_name, lyrics):
     c.save()
 
 def generate_simple_midi(midi_path):
-    # Simple placeholder MIDI (will be improved later)
+    # Creates a very basic MIDI file
     with open(midi_path, "wb") as f:
-        f.write(b'\x4D\x54\x68\x64\x00\x00\x00\x06\x00\x01\x00\x01\x00\x60\x4D\x54\x72\x6B\x00\x00\x00\x0A\x00\xFF\x51\x03\x0F\x42\x40\x00\xFF\x2F\x00')
+        f.write(b'MThd\x00\x00\x00\x06\x00\x01\x00\x01\x00\x60MTrk\x00\x00\x00\x0A\x00\xFF\x51\x03\x0F\x42\x40\x00\xFF\x2F\x00')
 
 @app.route('/download/pdf/<filename>')
 def download_pdf(filename):
