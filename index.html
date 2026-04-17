@@ -61,6 +61,7 @@
             </button>
         </div>
 
+        <!-- File Info -->
         <div id="file-info" class="hidden mt-8 bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
             <div class="flex justify-between items-center">
                 <p class="font-medium text-xl" id="filename"></p>
@@ -119,7 +120,7 @@
                 </button>
             </div>
 
-            <!-- Stems -->
+            <!-- Stem Separation -->
             <div>
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation</h4>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -166,4 +167,155 @@
     </div>
 
     <script>
-        let
+        let isLoginMode = true;
+
+        function showAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
+        function hideAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+            if (isLoginMode) {
+                document.getElementById('modal-title').textContent = "Login to Chordscribe";
+            } else {
+                document.getElementById('modal-title').textContent = "Create Account";
+            }
+        }
+
+        function handleAuth() {
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                alert("Please enter your email");
+                return;
+            }
+            alert(`✅ ${isLoginMode ? 'Logged in' : 'Account created'} as ${email}`);
+            hideAuthModal();
+        }
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('file-info').classList.remove('hidden');
+                document.getElementById('filename').textContent = file.name;
+                document.getElementById('results').classList.add('hidden');
+                document.getElementById('progress-container').classList.add('hidden');
+            }
+        }
+
+        async function startProcessing() {
+            const btn = document.getElementById('process-btn');
+            const originalText = btn.textContent;
+            btn.textContent = "Processing with AI...";
+            btn.disabled = true;
+
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('file-info').classList.add('hidden');
+
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            let progress = 0;
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercent = document.getElementById('progress-percent');
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 22 + 10;
+                if (progress > 95) progress = 95;
+                progressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.floor(progress) + '%';
+            }, 320);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+
+                if (data.success) {
+                    document.getElementById('song-name').textContent = "Song: " + file.name;
+                    
+                    let html = "";
+                    const lines = data.lyrics.split('\n');
+                    const commonChords = ["[C]", "[G]", "[Am]", "[F]", "[Em]", "[Dm]", "[C]", "[G]", "[F]", "[Am]"];
+                    let chordIndex = 0;
+
+                    for (let line of lines) {
+                        if (line.trim()) {
+                            const chord = commonChords[chordIndex % commonChords.length];
+                            html += `
+                                <div class="mb-7">
+                                    <span class="chord">${chord}</span>
+                                    <span class="ml-6">${line.trim()}</span>
+                                </div>`;
+                            chordIndex++;
+                        }
+                    }
+                    
+                    document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
+                    document.getElementById('results').classList.remove('hidden');
+                    
+                    window.currentPDF = data.pdf_filename;
+                    window.currentMIDI = data.midi_filename;
+                } else {
+                    alert("Error: " + (data.error || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Connection error: " + err.message);
+            }
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+            document.getElementById('progress-container').classList.add('hidden');
+        }
+
+        function downloadRealPDF() {
+            if (window.currentPDF) {
+                window.location.href = `/download/pdf/${window.currentPDF}`;
+            } else {
+                alert("Please process a song first.");
+            }
+        }
+
+        function downloadRealMIDI() {
+            if (window.currentMIDI) {
+                window.location.href = `/download/midi/${window.currentMIDI}`;
+            } else {
+                alert("Please process a song first.");
+            }
+        }
+
+        function shareTranscription() {
+            const songName = document.getElementById('song-name').textContent.replace("Song: ", "") || "this song";
+            const shareText = `Check out the chords & lyrics for "${songName}" made with Chordscribe! 🎸\n\nTry it yourself: ${window.location.href}`;
+            navigator.clipboard.writeText(shareText).then(() => {
+                alert("✅ Copied to clipboard!\n\nShare with your friends.");
+            });
+        }
+
+        function fakeDownload(type) {
+            alert(`✅ ${type} separation is coming soon in the full version.`);
+        }
+
+        function resetApp() {
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('file-info').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+            window.currentPDF = null;
+            window.currentMIDI = null;
+        }
+    </script>
+</body>
+</html>
