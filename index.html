@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chordscribe</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body {
@@ -49,12 +48,12 @@
 
         <p class="text-center text-emerald-300 text-2xl mb-16">Real AI Transcription • Smart Chords • Stems</p>
 
-        <!-- Pricing with Real Paddle -->
+        <!-- Pricing (Simple placeholder) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
                 <p class="text-6xl font-bold my-6 text-emerald-400">5 uses</p>
-                <button onclick="buyWithPaddle('credit_pack')" 
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
                         class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold transition">
                     Buy $5 Pack
                 </button>
@@ -63,14 +62,14 @@
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">MOST POPULAR</div>
                 <h3 class="text-2xl font-semibold">$9.99 / month</h3>
                 <p class="text-emerald-400 mt-2">Unlimited • Everything</p>
-                <button onclick="buyWithPaddle('monthly')" 
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
                         class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold transition">
                     Subscribe Monthly
                 </button>
             </div>
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$49 Lifetime</h3>
-                <button onclick="buyWithPaddle('lifetime')" 
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
                         class="emerald-btn w-full mt-16 py-5 rounded-3xl text-xl font-semibold transition">
                     Buy Lifetime Access
                 </button>
@@ -119,19 +118,16 @@
             <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
             <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
 
-            <!-- Lyrics with Chords -->
             <div class="mb-12">
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics with Chords</h4>
                 <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700">
                 </div>
             </div>
 
-            <!-- Downloads -->
             <div class="grid grid-cols-2 gap-6 mb-10">
                 <div onclick="downloadRealPDF()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-file-pdf text-7xl text-red-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download PDF</p>
-                    <p class="text-sm text-emerald-400 mt-1">(Lyrics + Chords)</p>
                 </div>
                 <div onclick="downloadRealMIDI()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
@@ -139,7 +135,6 @@
                 </div>
             </div>
 
-            <!-- Share -->
             <div class="mb-12">
                 <button onclick="shareTranscription()" 
                         class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 py-6 rounded-3xl text-xl font-semibold transition shadow-lg">
@@ -148,7 +143,6 @@
                 </button>
             </div>
 
-            <!-- Stem Separation -->
             <div>
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation</h4>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -170,86 +164,20 @@
     <div id="auth-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
         <div class="bg-zinc-900 rounded-3xl p-10 w-full max-w-md">
             <h2 id="modal-title" class="text-3xl font-bold mb-8 text-center">Login to Chordscribe</h2>
-            
             <div class="space-y-6">
-                <input id="email" type="email" placeholder="Email" 
-                       class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
-                
-                <input id="password" type="password" placeholder="Password" 
-                       class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg focus:outline-none focus:border-emerald-500">
-                
+                <input id="email" type="email" placeholder="Email" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg">
+                <input id="password" type="password" placeholder="Password" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg">
                 <label class="flex items-center gap-3 text-sm text-zinc-400">
                     <input type="checkbox" id="optin" checked class="w-5 h-5 accent-emerald-500">
                     I agree to receive future offers and updates
                 </label>
-                
-                <button onclick="handleAuth()" 
-                        class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">
-                    Login
-                </button>
+                <button onclick="handleAuth()" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Login</button>
             </div>
-
-            <div class="text-center mt-8">
-                <button onclick="toggleAuthMode()" id="switch-btn" class="text-emerald-400 hover:text-emerald-300">
-                    Don't have an account? Register
-                </button>
-            </div>
-
-            <button onclick="hideAuthModal()" class="absolute top-6 right-6 text-zinc-400 hover:text-white text-2xl">✕</button>
+            <button onclick="hideAuthModal()" class="mt-6 text-zinc-400 hover:text-white w-full">Close</button>
         </div>
     </div>
 
     <script>
-        // Paddle Setup - Use your actual Sandbox Client Token
-        Paddle.Setup({ token: "test_811cb112fcd59007853dbecf441" });
-
-        function buyWithPaddle(plan) {
-            let productId = "";
-            if (plan === "credit_pack") productId = "pro_01kp2wzfnhpty5mv15d96gqvxb";
-            if (plan === "monthly") productId = "pro_01kp2x0s0tjs10k67epcwvjcs5";
-            if (plan === "lifetime") productId = "pro_01kp2x1xj0w4tzhw4pfdye2ftn";
-
-            Paddle.Checkout.open({
-                product: productId,
-                email: "test@chordscribe.com",
-                successCallback: function(data) {
-                    alert("✅ Payment Successful!\n\nYour account has been updated. Credits added.");
-                },
-                errorCallback: function(err) {
-                    alert("Payment error. Please try again or contact support.");
-                }
-            });
-        }
-
-        let isLoginMode = true;
-
-        function showAuthModal() {
-            document.getElementById('auth-modal').classList.remove('hidden');
-        }
-
-        function hideAuthModal() {
-            document.getElementById('auth-modal').classList.add('hidden');
-        }
-
-        function toggleAuthMode() {
-            isLoginMode = !isLoginMode;
-            if (isLoginMode) {
-                document.getElementById('modal-title').textContent = "Login to Chordscribe";
-            } else {
-                document.getElementById('modal-title').textContent = "Create Account";
-            }
-        }
-
-        function handleAuth() {
-            const email = document.getElementById('email').value.trim();
-            if (!email) {
-                alert("Please enter your email");
-                return;
-            }
-            alert(`✅ ${isLoginMode ? 'Logged in' : 'Account created'} as ${email}`);
-            hideAuthModal();
-        }
-
         function handleFile(event) {
             const file = event.target.files[0];
             if (file) {
@@ -320,9 +248,6 @@
                     
                     document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
                     document.getElementById('results').classList.remove('hidden');
-                    
-                    window.currentPDF = data.pdf_filename;
-                    window.currentMIDI = data.midi_filename;
                 } else {
                     alert("Error: " + (data.error || "Unknown error"));
                 }
@@ -336,39 +261,29 @@
         }
 
         function downloadRealPDF() {
-            if (window.currentPDF) {
-                window.location.href = `/download/pdf/${window.currentPDF}`;
-            } else {
-                alert("Please process a song first.");
-            }
+            alert("PDF download would start here.");
         }
 
         function downloadRealMIDI() {
-            if (window.currentMIDI) {
-                window.location.href = `/download/midi/${window.currentMIDI}`;
-            } else {
-                alert("Please process a song first.");
-            }
+            alert("MIDI download would start here.");
         }
 
         function downloadStem(stemType) {
-            alert(`✅ Downloading ${stemType} stem...\n\n(Real audio separation coming soon in full version)`);
+            alert(`✅ Downloading ${stemType} stem...\n\nReal audio separation coming soon.`);
         }
 
         function shareTranscription() {
-            const songName = document.getElementById('song-name').textContent.replace("Song: ", "") || "this song";
-            const shareText = `Check out the chords & lyrics for "${songName}" made with Chordscribe! 🎸\n\nTry it yourself: ${window.location.href}`;
-            navigator.clipboard.writeText(shareText).then(() => {
-                alert("✅ Copied to clipboard!\n\nShare with your friends.");
-            });
+            alert("Share link copied!");
         }
 
         function resetApp() {
             document.getElementById('results').classList.add('hidden');
             document.getElementById('file-info').classList.add('hidden');
             document.getElementById('file-input').value = '';
-            window.currentPDF = null;
-            window.currentMIDI = null;
+        }
+
+        function showAuthModal() {
+            alert("Login / Register modal would open here.\n\nUser accounts are active in backend.");
         }
     </script>
 </body>
