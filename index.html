@@ -200,7 +200,7 @@
     </div>
 
     <script>
-        // Paddle Setup - Use your actual Sandbox Client Token here
+        // Paddle Setup - Use your actual Sandbox Client Token
         Paddle.Setup({ token: "test_811cb112fcd59007853dbecf441" });
 
         function buyWithPaddle(plan) {
@@ -216,7 +216,7 @@
                     alert("✅ Payment Successful!\n\nYour account has been updated. Credits added.");
                 },
                 errorCallback: function(err) {
-                    alert("Payment error: " + JSON.stringify(err));
+                    alert("Payment error. Please try again or contact support.");
                 }
             });
         }
