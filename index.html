@@ -27,8 +27,7 @@
         }
         .emerald-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4),
-                        0 8px 10px -6px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4);
         }
     </style>
 </head>
@@ -48,7 +47,7 @@
 
         <p class="text-center text-emerald-300 text-2xl mb-16">Real AI Transcription • Smart Chords • Stems</p>
 
-        <!-- Pricing (Simple placeholder) -->
+        <!-- Pricing Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
@@ -76,7 +75,7 @@
             </div>
         </div>
 
-        <!-- Upload -->
+        <!-- Upload Area -->
         <div class="bg-zinc-900/70 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
             <i class="fa-solid fa-cloud-arrow-up text-8xl text-emerald-400 mb-8"></i>
             <p class="text-4xl font-medium mb-3">Drop your song here</p>
@@ -118,16 +117,19 @@
             <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
             <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
 
+            <!-- Lyrics with Chords -->
             <div class="mb-12">
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics with Chords</h4>
                 <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700">
                 </div>
             </div>
 
+            <!-- Downloads -->
             <div class="grid grid-cols-2 gap-6 mb-10">
                 <div onclick="downloadRealPDF()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-file-pdf text-7xl text-red-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download PDF</p>
+                    <p class="text-sm text-emerald-400 mt-1">(Lyrics + Chords)</p>
                 </div>
                 <div onclick="downloadRealMIDI()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
@@ -135,6 +137,7 @@
                 </div>
             </div>
 
+            <!-- Share -->
             <div class="mb-12">
                 <button onclick="shareTranscription()" 
                         class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 py-6 rounded-3xl text-xl font-semibold transition shadow-lg">
@@ -143,6 +146,7 @@
                 </button>
             </div>
 
+            <!-- Stem Separation -->
             <div>
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation</h4>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -208,83 +212,4 @@
             const interval = setInterval(() => {
                 progress += Math.random() * 22 + 10;
                 if (progress > 95) progress = 95;
-                progressBar.style.width = progress + '%';
-                progressPercent.textContent = Math.floor(progress) + '%';
-            }, 320);
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const res = await fetch('/api/transcribe', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-
-                clearInterval(interval);
-                progressBar.style.width = '100%';
-                progressPercent.textContent = '100%';
-
-                if (data.success) {
-                    document.getElementById('song-name').textContent = "Song: " + file.name;
-                    
-                    let html = "";
-                    const lines = data.lyrics.split('\n');
-                    const commonChords = ["[C]", "[G]", "[Am]", "[F]", "[Em]", "[Dm]", "[C]", "[G]", "[F]", "[Am]"];
-                    let chordIndex = 0;
-
-                    for (let line of lines) {
-                        if (line.trim()) {
-                            const chord = commonChords[chordIndex % commonChords.length];
-                            html += `
-                                <div class="mb-7">
-                                    <span class="chord">${chord}</span>
-                                    <span class="ml-6">${line.trim()}</span>
-                                </div>`;
-                            chordIndex++;
-                        }
-                    }
-                    
-                    document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
-                    document.getElementById('results').classList.remove('hidden');
-                } else {
-                    alert("Error: " + (data.error || "Unknown error"));
-                }
-            } catch (err) {
-                alert("Connection error: " + err.message);
-            }
-
-            btn.textContent = originalText;
-            btn.disabled = false;
-            document.getElementById('progress-container').classList.add('hidden');
-        }
-
-        function downloadRealPDF() {
-            alert("PDF download would start here.");
-        }
-
-        function downloadRealMIDI() {
-            alert("MIDI download would start here.");
-        }
-
-        function downloadStem(stemType) {
-            alert(`✅ Downloading ${stemType} stem...\n\nReal audio separation coming soon.`);
-        }
-
-        function shareTranscription() {
-            alert("Share link copied!");
-        }
-
-        function resetApp() {
-            document.getElementById('results').classList.add('hidden');
-            document.getElementById('file-info').classList.add('hidden');
-            document.getElementById('file-input').value = '';
-        }
-
-        function showAuthModal() {
-            alert("Login / Register modal would open here.\n\nUser accounts are active in backend.");
-        }
-    </script>
-</body>
-</html>
+                progressBar.style.width = progress
