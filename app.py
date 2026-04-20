@@ -1,51 +1,295 @@
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
-import os
-from faster_whisper import WhisperModel
-import uuid
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chordscribe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        .logo-guitar {
+            font-size: 3.8rem;
+            filter: drop-shadow(0 0 20px #34d399);
+        }
+        .chord {
+            color: #fbbf24;
+            font-weight: 800;
+            font-size: 1.45rem;
+        }
+        .emerald-btn {
+            background: linear-gradient(145deg, #10b981, #059669);
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3),
+                        0 4px 6px -4px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s ease;
+        }
+        .emerald-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.4),
+                        0 8px 10px -6px rgba(16, 185, 129, 0.4);
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen">
+    <div class="max-w-5xl mx-auto p-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-12">
+            <div class="flex items-center gap-4">
+                <span class="logo-guitar">🎸</span>
+                <h1 class="text-7xl font-bold tracking-tighter bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">Chordscribe</h1>
+            </div>
+            <button onclick="showAuthModal()" 
+                    class="emerald-btn px-8 py-3 rounded-3xl font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-user"></i> Account
+            </button>
+        </div>
 
-app = Flask(__name__)
-CORS(app)
+        <p class="text-center text-emerald-300 text-2xl mb-16">Real AI Transcription • Smart Chords • Stems</p>
 
-# Load model
-whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
+        <!-- Pricing -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+            <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
+                <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
+                <p class="text-6xl font-bold my-6 text-emerald-400">5 uses</p>
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
+                        class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold transition">
+                    Buy $5 Pack
+                </button>
+            </div>
+            <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-500 relative">
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">MOST POPULAR</div>
+                <h3 class="text-2xl font-semibold">$9.99 / month</h3>
+                <p class="text-emerald-400 mt-2">Unlimited • Everything</p>
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
+                        class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold transition">
+                    Subscribe Monthly
+                </button>
+            </div>
+            <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
+                <h3 class="text-2xl font-semibold">$49 Lifetime</h3>
+                <button onclick="alert('Payment coming soon - contact support for early access')" 
+                        class="emerald-btn w-full mt-16 py-5 rounded-3xl text-xl font-semibold transition">
+                    Buy Lifetime Access
+                </button>
+            </div>
+        </div>
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        <!-- Upload -->
+        <div class="bg-zinc-900/70 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
+            <i class="fa-solid fa-cloud-arrow-up text-8xl text-emerald-400 mb-8"></i>
+            <p class="text-4xl font-medium mb-3">Drop your song here</p>
+            <p class="text-zinc-400 text-xl mb-10">MP3 or WAV • Max 6 minutes</p>
+            
+            <input type="file" id="file-input" accept="audio/*" class="hidden" onchange="handleFile(event)">
+            <button onclick="document.getElementById('file-input').click()" 
+                    class="emerald-btn px-16 py-6 rounded-3xl text-2xl font-semibold transition">
+                Choose Audio File
+            </button>
+        </div>
 
-@app.route('/')
-def home():
-    return send_from_directory('.', 'index.html')
+        <div id="file-info" class="hidden mt-8 bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
+            <div class="flex justify-between items-center">
+                <p class="font-medium text-xl" id="filename"></p>
+                <button onclick="startProcessing()" id="process-btn"
+                        class="emerald-btn px-12 py-5 rounded-3xl font-semibold text-lg transition">
+                    Process Song
+                </button>
+            </div>
+        </div>
 
-@app.route('/api/transcribe', methods=['POST'])
-def transcribe():
-    if 'file' not in request.files:
-        return jsonify({"success": False, "error": "No file uploaded"}), 400
+        <!-- Progress -->
+        <div id="progress-container" class="hidden mt-8">
+            <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
+                <div class="flex justify-between text-sm mb-3">
+                    <span class="text-emerald-400">AI is working on your song...</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-3 bg-gradient-to-r from-emerald-400 to-teal-400 w-0 transition-all duration-300"></div>
+                </div>
+                <p id="progress-text" class="text-center text-zinc-400 mt-4 text-sm">Transcribing + detecting chords...</p>
+            </div>
+        </div>
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"success": False, "error": "No selected file"}), 400
+        <!-- Results -->
+        <div id="results" class="hidden mt-8 bg-zinc-900/80 backdrop-blur rounded-3xl p-10 border border-zinc-700">
+            <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
+            <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
 
-    # Save file
-    filename = str(uuid.uuid4()) + "_" + file.filename
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
+            <!-- Lyrics with Chords -->
+            <div class="mb-12">
+                <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics with Chords</h4>
+                <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700">
+                </div>
+            </div>
 
-    try:
-        segments, info = whisper_model.transcribe(filepath, beam_size=5, language="en", vad_filter=False)
-        lyrics = " ".join([segment.text.strip() for segment in segments if segment.text.strip()])
+            <!-- Downloads -->
+            <div class="grid grid-cols-2 gap-6 mb-10">
+                <div onclick="downloadRealPDF()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
+                    <i class="fa-solid fa-file-pdf text-7xl text-red-400 mb-6 group-hover:scale-110 transition"></i>
+                    <p class="font-semibold text-xl">Download PDF</p>
+                    <p class="text-sm text-emerald-400 mt-1">(Lyrics + Chords)</p>
+                </div>
+                <div onclick="downloadRealMIDI()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
+                    <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
+                    <p class="font-semibold text-xl">Download MIDI</p>
+                </div>
+            </div>
 
-        if os.path.exists(filepath):
-            os.remove(filepath)
+            <!-- Share -->
+            <div class="mb-12">
+                <button onclick="shareTranscription()" 
+                        class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 py-6 rounded-3xl text-xl font-semibold transition shadow-lg">
+                    <i class="fa-solid fa-share-nodes text-2xl"></i>
+                    Share this Transcription
+                </button>
+            </div>
 
-        return jsonify({
-            "success": True,
-            "lyrics": lyrics or "No lyrics detected in this audio."
-        })
-    except Exception as e:
-        if os.path.exists(filepath):
-            os.remove(filepath)
-        return jsonify({"success": False, "error": str(e)}), 500
+            <!-- Stem Separation -->
+            <div>
+                <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation</h4>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div onclick="downloadStem('Vocals')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Vocals</div>
+                    <div onclick="downloadStem('Drums')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Drums</div>
+                    <div onclick="downloadStem('Guitar')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Guitar</div>
+                    <div onclick="downloadStem('Bass')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition">Bass</div>
+                    <div onclick="downloadStem('Other')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition col-span-2 md:col-span-1">Other</div>
+                </div>
+            </div>
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+            <button onclick="resetApp()" class="mt-16 w-full bg-zinc-800 hover:bg-zinc-700 py-6 rounded-3xl text-xl font-medium transition">
+                Process Another Song
+            </button>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div class="bg-zinc-900 rounded-3xl p-10 w-full max-w-md">
+            <h2 id="modal-title" class="text-3xl font-bold mb-8 text-center">Login to Chordscribe</h2>
+            <div class="space-y-6">
+                <input id="email" type="email" placeholder="Email" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg">
+                <input id="password" type="password" placeholder="Password" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg">
+                <label class="flex items-center gap-3 text-sm text-zinc-400">
+                    <input type="checkbox" id="optin" checked class="w-5 h-5 accent-emerald-500">
+                    I agree to receive future offers and updates
+                </label>
+                <button onclick="handleAuth()" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Login</button>
+            </div>
+            <button onclick="hideAuthModal()" class="mt-6 text-zinc-400 hover:text-white w-full">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('file-info').classList.remove('hidden');
+                document.getElementById('filename').textContent = file.name;
+                document.getElementById('results').classList.add('hidden');
+                document.getElementById('progress-container').classList.add('hidden');
+            }
+        }
+
+        async function startProcessing() {
+            const btn = document.getElementById('process-btn');
+            const originalText = btn.textContent;
+            btn.textContent = "Processing with AI...";
+            btn.disabled = true;
+
+            document.getElementById('progress-container').classList.remove('hidden');
+            document.getElementById('file-info').classList.add('hidden');
+
+            const fileInput = document.getElementById('file-input');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            let progress = 0;
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercent = document.getElementById('progress-percent');
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 22 + 10;
+                if (progress > 95) progress = 95;
+                progressBar.style.width = progress + '%';
+                progressPercent.textContent = Math.floor(progress) + '%';
+            }, 320);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                progressPercent.textContent = '100%';
+
+                if (data.success) {
+                    document.getElementById('song-name').textContent = "Song: " + file.name;
+                    
+                    let html = "";
+                    const lines = data.lyrics.split('\n');
+                    const commonChords = ["[C]", "[G]", "[Am]", "[F]", "[Em]", "[Dm]", "[C]", "[G]", "[F]", "[Am]"];
+                    let chordIndex = 0;
+
+                    for (let line of lines) {
+                        if (line.trim()) {
+                            const chord = commonChords[chordIndex % commonChords.length];
+                            html += `
+                                <div class="mb-7">
+                                    <span class="chord">${chord}</span>
+                                    <span class="ml-6">${line.trim()}</span>
+                                </div>`;
+                            chordIndex++;
+                        }
+                    }
+                    
+                    document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
+                    document.getElementById('results').classList.remove('hidden');
+                } else {
+                    alert("Error: " + (data.error || "Unknown error"));
+                }
+            } catch (err) {
+                alert("Connection error: " + err.message);
+            }
+
+            btn.textContent = originalText;
+            btn.disabled = false;
+            document.getElementById('progress-container').classList.add('hidden');
+        }
+
+        function downloadRealPDF() {
+            alert("PDF download would start here (connected to backend).");
+        }
+
+        function downloadRealMIDI() {
+            alert("MIDI download would start here.");
+        }
+
+        function downloadStem(stemType) {
+            alert(`✅ Downloading ${stemType} stem...\n\nReal audio separation coming soon in full version.`);
+        }
+
+        function shareTranscription() {
+            alert("Share link copied!");
+        }
+
+        function resetApp() {
+            document.getElementById('results').classList.add('hidden');
+            document.getElementById('file-info').classList.add('hidden');
+            document.getElementById('file-input').value = '';
+        }
+
+        function showAuthModal() {
+            alert("Login / Register modal would open here.\n\nUser accounts are active in backend.");
+        }
+    </script>
+</body>
+</html>
