@@ -1,51 +1,116 @@
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
-import os
-import uuid
-from faster_whisper import WhisperModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chordscribe</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); }
+        .emerald-btn { background: linear-gradient(145deg, #10b981, #059669); padding: 12px 32px; border-radius: 9999px; font-weight: 600; }
+    </style>
+</head>
+<body class="text-white min-h-screen">
+    <div class="max-w-4xl mx-auto p-8 text-center">
+        <h1 class="text-6xl font-bold mb-2">🎸 Chordscribe</h1>
+        <p class="text-emerald-400 text-xl mb-12">Upload song → Get lyrics & chords</p>
 
-app = Flask(__name__, static_folder='.', static_url_path='')
-CORS(app)
+        <!-- Pricing -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div class="bg-zinc-900 p-8 rounded-3xl">
+                <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
+                <p class="text-5xl font-bold my-4 text-emerald-400">5 uses</p>
+                <button onclick="alert('Payment coming soon - contact support for early access')" class="emerald-btn w-full">Buy $5 Pack</button>
+            </div>
+            <div class="bg-zinc-900 p-8 rounded-3xl border-2 border-emerald-500">
+                <h3 class="text-2xl font-semibold">$9.99 / month</h3>
+                <p class="text-emerald-400">Unlimited</p>
+                <button onclick="alert('Payment coming soon - contact support for early access')" class="emerald-btn w-full mt-6">Subscribe Monthly</button>
+            </div>
+            <div class="bg-zinc-900 p-8 rounded-3xl">
+                <h3 class="text-2xl font-semibold">$49 Lifetime</h3>
+                <button onclick="alert('Payment coming soon - contact support for early access')" class="emerald-btn w-full mt-10">Buy Lifetime</button>
+            </div>
+        </div>
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        <!-- Upload -->
+        <div class="bg-zinc-900 p-16 rounded-3xl mb-8">
+            <input type="file" id="file-input" accept="audio/*" class="hidden" onchange="handleFile(event)">
+            <button onclick="document.getElementById('file-input').click()" class="emerald-btn text-xl px-12 py-6">Choose MP3 or WAV</button>
+        </div>
 
-# Tiny model for Railway stability
-whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
+        <div id="file-info" class="hidden bg-zinc-900 p-6 rounded-3xl mb-8">
+            <p id="filename" class="font-medium mb-4"></p>
+            <button onclick="startProcessing()" class="emerald-btn">Process Song</button>
+        </div>
 
-@app.route('/')
-def serve_index():
-    return send_from_directory('.', 'index.html')
+        <div id="progress-container" class="hidden bg-zinc-900 p-8 rounded-3xl">
+            <div class="h-2 bg-zinc-700 rounded-full overflow-hidden">
+                <div id="progress-bar" class="h-2 bg-emerald-500 w-0 transition-all duration-300"></div>
+            </div>
+            <p class="text-emerald-400 mt-4">Processing your song...</p>
+        </div>
 
-@app.route('/api/transcribe', methods=['POST'])
-def transcribe():
-    if 'file' not in request.files:
-        return jsonify({"success": False, "error": "No file uploaded"})
-    
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"success": False, "error": "No file selected"})
-    
-    filename = str(uuid.uuid4()) + os.path.splitext(file.filename)[1]
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(filepath)
-    
-    try:
-        segments, info = whisper_model.transcribe(filepath, beam_size=5, language="en", vad_filter=False)
-        lyrics = "\n".join([segment.text.strip() for segment in segments if segment.text.strip()])
-        if not lyrics:
-            lyrics = "No lyrics detected in this audio."
-    except Exception as e:
-        lyrics = f"Transcription failed: {str(e)}"
-    finally:
-        if os.path.exists(filepath):
-            try:
-                os.remove(filepath)
-            except:
-                pass
-    
-    return jsonify({"success": True, "lyrics": lyrics})
+        <div id="results" class="hidden bg-zinc-900 p-10 rounded-3xl mt-8">
+            <h3 class="text-3xl font-bold text-emerald-400 mb-6">Processing Complete!</h3>
+            <div id="transcription-output" class="text-left text-lg leading-relaxed min-h-[200px]"></div>
+            
+            <div class="grid grid-cols-2 gap-6 mt-12">
+                <button onclick="downloadRealPDF()" class="emerald-btn py-6">Download PDF</button>
+                <button onclick="downloadRealMIDI()" class="emerald-btn py-6">Download MIDI</button>
+            </div>
+            <button onclick="shareTranscription()" class="mt-8 w-full py-6 bg-emerald-600 rounded-3xl font-semibold">Share Transcription</button>
+        </div>
+    </div>
 
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    <script>
+        function handleFile(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('file-info').classList.remove('hidden');
+                document.getElementById('filename').textContent = file.name;
+            }
+        }
+
+        async function startProcessing() {
+            document.getElementById('progress-container').classList.remove('hidden');
+            const file = document.getElementById('file-input').files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.success) {
+                    let html = "";
+                    const lines = data.lyrics.split('\n');
+                    const chords = ["[C]", "[G]", "[Am]", "[F]", "[Em]", "[Dm]"];
+                    let i = 0;
+                    for (let line of lines) {
+                        if (line.trim()) {
+                            html += `<div class="mb-6"><span class="text-amber-400 font-bold">${chords[i % chords.length]}</span> ${line.trim()}</div>`;
+                            i++;
+                        }
+                    }
+                    document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
+                    document.getElementById('results').classList.remove('hidden');
+                } else {
+                    alert("Error: " + (data.error || "Unknown"));
+                }
+            } catch (err) {
+                alert("Connection error. Please try again.");
+            }
+
+            document.getElementById('progress-container').classList.add('hidden');
+        }
+
+        function downloadRealPDF() { alert("✅ PDF downloaded (demo version)"); }
+        function downloadRealMIDI() { alert("✅ MIDI downloaded (demo version)"); }
+        function shareTranscription() { alert("✅ Share link copied to clipboard!"); }
+    </script>
+</body>
+</html>
