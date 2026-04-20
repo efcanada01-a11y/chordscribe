@@ -70,7 +70,7 @@
         <!-- Progress -->
         <div id="progress-container" class="hidden mt-8">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
-                <div class="flex justify-between text-sm mb-3"><span class="text-emerald-400">AI is working...</span><span id="progress-percent">0%</span></div>
+                <div class="flex justify-between text-sm mb-3"><span class="text-emerald-400">AI is working on your song...</span><span id="progress-percent">0%</span></div>
                 <div class="h-3 bg-zinc-800 rounded-full overflow-hidden"><div id="progress-bar" class="h-3 bg-gradient-to-r from-emerald-400 to-teal-400 w-0 transition-all"></div></div>
             </div>
         </div>
@@ -79,21 +79,33 @@
         <div id="results" class="hidden mt-8 bg-zinc-900/80 backdrop-blur rounded-3xl p-10 border border-zinc-700">
             <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
             <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
+
             <div class="mb-12">
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Lyrics with Chords</h4>
                 <div id="transcription-output" class="text-left font-light text-lg leading-relaxed bg-black/60 p-10 rounded-2xl border border-zinc-700"></div>
             </div>
+
+            <!-- Downloads -->
             <div class="grid grid-cols-2 gap-6 mb-10">
                 <div onclick="downloadRealPDF()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-file-pdf text-7xl text-red-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download PDF</p>
+                    <p class="text-sm text-emerald-400 mt-1">(Lyrics + Chords)</p>
                 </div>
                 <div onclick="downloadRealMIDI()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download MIDI</p>
                 </div>
             </div>
-            <button onclick="shareTranscription()" class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 py-6 rounded-3xl text-xl font-semibold mb-12">Share this Transcription</button>
+
+            <!-- Share -->
+            <div class="mb-12">
+                <button onclick="shareTranscription()" class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 py-6 rounded-3xl text-xl font-semibold transition shadow-lg">
+                    <i class="fa-solid fa-share-nodes text-2xl"></i> Share this Transcription
+                </button>
+            </div>
+
+            <!-- Stems -->
             <div>
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation</h4>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -104,7 +116,10 @@
                     <div onclick="downloadStem('Other')" class="bg-zinc-900 hover:bg-emerald-900/30 p-6 rounded-2xl text-center cursor-pointer border border-zinc-700 hover:border-emerald-500 transition col-span-2 md:col-span-1">Other</div>
                 </div>
             </div>
-            <button onclick="resetApp()" class="mt-16 w-full bg-zinc-800 hover:bg-zinc-700 py-6 rounded-3xl text-xl font-medium">Process Another Song</button>
+
+            <button onclick="resetApp()" class="mt-16 w-full bg-zinc-800 hover:bg-zinc-700 py-6 rounded-3xl text-xl font-medium transition">
+                Process Another Song
+            </button>
         </div>
     </div>
 
@@ -115,81 +130,4 @@
             <div class="space-y-6">
                 <input id="email" type="email" placeholder="Email" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg">
                 <input id="password" type="password" placeholder="Password" class="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 text-lg">
-                <label class="flex items-center gap-3 text-sm text-zinc-400"><input type="checkbox" id="optin" checked class="w-5 h-5 accent-emerald-500"> I agree to receive future offers and updates</label>
-                <button onclick="handleAuth()" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Login</button>
-            </div>
-            <button onclick="hideAuthModal()" class="mt-6 text-zinc-400 hover:text-white w-full">Close</button>
-        </div>
-    </div>
-
-    <script>
-        function handleFile(event) {
-            const file = event.target.files[0];
-            if (file) {
-                document.getElementById('file-info').classList.remove('hidden');
-                document.getElementById('filename').textContent = file.name;
-                document.getElementById('results').classList.add('hidden');
-                document.getElementById('progress-container').classList.add('hidden');
-            }
-        }
-
-        async function startProcessing() {
-            const btn = document.getElementById('process-btn');
-            btn.textContent = "Processing...";
-            btn.disabled = true;
-            document.getElementById('progress-container').classList.remove('hidden');
-            document.getElementById('file-info').classList.add('hidden');
-
-            const file = document.getElementById('file-input').files[0];
-            const formData = new FormData();
-            formData.append('file', file);
-
-            try {
-                const res = await fetch('/api/transcribe', { method: 'POST', body: formData });
-                const data = await res.json();
-
-                if (data.success) {
-                    document.getElementById('song-name').textContent = "Song: " + file.name;
-                    let html = "";
-                    const lines = data.lyrics.split('\n');
-                    const chords = ["[C]", "[G]", "[Am]", "[F]", "[Em]", "[Dm]"];
-                    let i = 0;
-                    for (let line of lines) {
-                        if (line.trim()) {
-                            html += `<div class="mb-7"><span class="chord">${chords[i % chords.length]}</span><span class="ml-6">${line.trim()}</span></div>`;
-                            i++;
-                        }
-                    }
-                    document.getElementById('transcription-output').innerHTML = html || "<p>No lyrics detected.</p>";
-                    document.getElementById('results').classList.remove('hidden');
-                } else {
-                    alert("Error: " + data.error);
-                }
-            } catch (e) {
-                alert("Connection error");
-            }
-
-            btn.textContent = "Process Song";
-            btn.disabled = false;
-            document.getElementById('progress-container').classList.add('hidden');
-        }
-
-        function downloadRealPDF() { alert("✅ PDF downloaded! (Full version will give real file)"); }
-        function downloadRealMIDI() { alert("✅ MIDI downloaded! (Full version will give real file)"); }
-        function downloadStem(type) { alert(`✅ ${type} stem downloaded!`); }
-        function shareTranscription() { alert("✅ Share link copied to clipboard!"); }
-        function resetApp() {
-            document.getElementById('results').classList.add('hidden');
-            document.getElementById('file-info').classList.add('hidden');
-            document.getElementById('file-input').value = '';
-        }
-        function showAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
-        function hideAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
-        function handleAuth() {
-            const email = document.getElementById('email').value.trim() || "user@example.com";
-            alert(`✅ Logged in as ${email}\nOpt-in: ${document.getElementById('optin').checked ? 'Yes' : 'No'}`);
-            hideAuthModal();
-        }
-    </script>
-</body>
-</html>
+                <label class="flex items
