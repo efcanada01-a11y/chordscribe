@@ -10,15 +10,12 @@ CORS(app)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Tiny model for stability on Railway
 whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
 
-# Serve the index.html when someone visits the main URL
 @app.route('/')
 def serve_index():
     return send_from_directory('.', 'index.html')
 
-# The transcription endpoint
 @app.route('/api/transcribe', methods=['POST'])
 def transcribe():
     if 'file' not in request.files:
@@ -33,12 +30,7 @@ def transcribe():
     file.save(filepath)
     
     try:
-        segments, info = whisper_model.transcribe(
-            filepath, 
-            beam_size=5, 
-            language="en", 
-            vad_filter=False
-        )
+        segments, info = whisper_model.transcribe(filepath, beam_size=5, language="en", vad_filter=False)
         lyrics = "\n".join([segment.text.strip() for segment in segments if segment.text.strip()])
         if not lyrics:
             lyrics = "No lyrics detected in this audio."
@@ -51,10 +43,8 @@ def transcribe():
             except:
                 pass
     
-    return jsonify({
-        "success": True,
-        "lyrics": lyrics
-    })
+    return jsonify({"success": True, "lyrics": lyrics})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
