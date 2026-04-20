@@ -10,7 +10,6 @@ CORS(app)
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Tiny model for Railway stability
 whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
 
 @app.route('/')
