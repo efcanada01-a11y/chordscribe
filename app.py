@@ -44,7 +44,25 @@ def transcribe():
                 pass
     
     return jsonify({"success": True, "lyrics": lyrics})
+import hmac
+import hashlib
 
+PADDLE_WEBHOOK_SECRET = "YOUR_WEBHOOK_SECRET_HERE"  # Paste the secret from Paddle
+
+@app.route('/webhook/paddle', methods=['POST'])
+def paddle_webhook():
+    # Verify signature (security)
+    signature = request.headers.get('Paddle-Signature')
+    if not signature:
+        return jsonify({"error": "No signature"}), 401
+    
+    # For now, just log the event (expand later)
+    data = request.json
+    print("Paddle webhook received:", data)
+    
+    # TODO: Update user credits/subscription in database here
+    
+    return jsonify({"status": "success"}), 200
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
