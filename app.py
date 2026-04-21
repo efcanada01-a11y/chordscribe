@@ -47,7 +47,7 @@ def transcribe():
 import hmac
 import hashlib
 
-PADDLE_WEBHOOK_SECRET = "YOUR_WEBHOOK_SECRET_HERE"  # Paste the secret from Paddle
+PADDLE_WEBHOOK_SECRET = "pdl_ntfset_01kpq5hz36ps24nvhwsanapa8t_P+VYacJH2oai3i45C/AbXfjQ8DUtBhPp"  # Paste the secret from Paddle
 
 @app.route('/webhook/paddle', methods=['POST'])
 def paddle_webhook():
