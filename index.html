@@ -20,7 +20,6 @@
 </head>
 <body class="text-white min-h-screen">
     <div class="max-w-5xl mx-auto p-8">
-        <!-- Header -->
         <div class="flex justify-between items-center mb-12">
             <div class="flex items-center gap-4">
                 <span class="logo-guitar">🎸</span>
@@ -31,24 +30,24 @@
             </button>
         </div>
 
-        <p class="text-center text-emerald-300 text-2xl mb-16">Real AI Transcription • Smart Chords • Stems</p>
+        <p class="text-center text-emerald-300 text-2xl mb-16">Upload any song • Get lyrics, chords, stems & MIDI</p>
 
         <!-- Pricing -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
                 <p class="text-6xl font-bold my-6 text-emerald-400">5 uses</p>
-                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access or lifetime deal')" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Buy $5 Pack</button>
+                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access')" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Buy $5 Pack</button>
             </div>
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-500 relative">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">MOST POPULAR</div>
                 <h3 class="text-2xl font-semibold">$9.99 / month</h3>
                 <p class="text-emerald-400 mt-2">Unlimited access</p>
-                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access or lifetime deal')" class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold">Subscribe Monthly</button>
+                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access')" class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold">Subscribe Monthly</button>
             </div>
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$49 Lifetime</h3>
-                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access or lifetime deal')" class="emerald-btn w-full mt-16 py-5 rounded-3xl text-xl font-semibold">Buy Lifetime Access</button>
+                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access')" class="emerald-btn w-full mt-16 py-5 rounded-3xl text-xl font-semibold">Buy Lifetime Access</button>
             </div>
         </div>
 
@@ -83,7 +82,7 @@
 
         <!-- Results -->
         <div id="results" class="hidden mt-8 bg-zinc-900/80 backdrop-blur rounded-3xl p-10 border border-zinc-700">
-            <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
+            <h3 class="text-3xl font-semibold mb-2 text-emerald-400">✅ Processing Complete!</h3>
             <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
 
             <div class="mb-12">
@@ -201,7 +200,7 @@
         function downloadStem(type) { alert(`✅ ${type} stem downloaded successfully!\n\nReal separated audio track.`); }
         function shareTranscription() {
             const songName = document.getElementById('song-name').textContent.replace("Song: ", "") || "this song";
-            const shareText = `Check out the chords & lyrics for "${songName}" from Chordscribe! 🎸\nTry it: ${window.location.href}`;
+            const shareText = `Check out the chords & lyrics for "${songName}" from Chordscribe! 🎸\nTry it yourself: ${window.location.href}`;
             navigator.clipboard.writeText(shareText).then(() => alert("✅ Share link copied to clipboard!"));
         }
         function resetApp() {
