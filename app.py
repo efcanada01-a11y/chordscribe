@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import uuid
+import hmac
+import hashlib
+import json
 from faster_whisper import WhisperModel
 
 app = Flask(__name__, static_folder='.', static_url_path='')
@@ -11,6 +14,10 @@ UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
+
+# === PUT YOUR PADDLE WEBHOOK SECRET HERE ===
+PADDLE_WEBHOOK_SECRET = "pdl_ntfset_01kpq5hz36ps24nvhwsanapa8t_P+VYacJH2oai3i45C/AbXfjQ8DUtBhPp
+"   # ← Replace with your actual secret
 
 @app.route('/')
 def serve_index():
@@ -44,25 +51,29 @@ def transcribe():
                 pass
     
     return jsonify({"success": True, "lyrics": lyrics})
-import hmac
-import hashlib
 
-PADDLE_WEBHOOK_SECRET = "pdl_ntfset_01kpq5hz36ps24nvhwsanapa8t_P+VYacJH2oai3i45C/AbXfjQ8DUtBhPp"  # Paste the secret from Paddle
-
+# Paddle Webhook - This is where Paddle sends payment confirmations
 @app.route('/webhook/paddle', methods=['POST'])
 def paddle_webhook():
-    # Verify signature (security)
-    signature = request.headers.get('Paddle-Signature')
-    if not signature:
-        return jsonify({"error": "No signature"}), 401
-    
-    # For now, just log the event (expand later)
-    data = request.json
-    print("Paddle webhook received:", data)
-    
-    # TODO: Update user credits/subscription in database here
-    
-    return jsonify({"status": "success"}), 200
+    try:
+        payload = request.get_data()
+        signature = request.headers.get('Paddle-Signature')
+
+        if not signature or not PADDLE_WEBHOOK_SECRET:
+            return jsonify({"status": "error", "message": "Missing signature or secret"}), 401
+
+        # Basic verification (for now)
+        print("Paddle webhook received:", request.json)
+        
+        # TODO: Later we will add user credit logic here
+        # For example: if payment successful → give user 5 credits
+
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        print("Webhook error:", str(e))
+        return jsonify({"status": "error"}), 400
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
