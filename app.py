@@ -16,8 +16,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
 
 # === PUT YOUR PADDLE WEBHOOK SECRET HERE ===
-PADDLE_WEBHOOK_SECRET = "pdl_ntfset_01kpq5hz36ps24nvhwsanapa8t_P+VYacJH2oai3i45C/AbXfjQ8DUtBhPp
-"   # ← Replace with your actual secret
+PADDLE_WEBHOOK_SECRET = "https://railway.com/project/85ce24b7-fb5b-400f-a3ff-6d4fc7323569/webhook/paddle"   # ← Replace with your actual secret
 
 @app.route('/')
 def serve_index():
