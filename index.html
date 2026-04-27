@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <!-- Upload Section - Hidden until Free Trial or Login -->
+        <!-- Upload Section (Hidden until Free Trial or Login) -->
         <div id="upload-section" class="hidden">
             <div class="bg-zinc-900/70 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
                 <i class="fa-solid fa-cloud-arrow-up text-8xl text-emerald-400 mb-8"></i>
@@ -152,7 +152,7 @@
     </div>
 
     <script>
-        // Paddle Setup - Use your actual Sandbox Client Token here
+        // === YOUR PADDLE CLIENT TOKEN (Sandbox) ===
         Paddle.Setup({ token: "test_811cb112fcd59007853dbecf441" });
 
         function buyWithPaddle(plan) {
@@ -166,16 +166,17 @@
                 email: "test@chordscribe.com",
                 successCallback: function(data) {
                     alert("✅ Payment Successful!\n\nYour account has been updated.");
+                    // You can add logic to unlock more uses here later
                 },
                 errorCallback: function(err) {
-                    console.error(err);
-                    alert("Payment error. Please try again or contact support.");
+                    console.error("Paddle error:", err);
+                    alert("Payment error. Please try again or contact support.\n\nError: " + JSON.stringify(err));
                 }
             });
         }
 
         function startFreeTrial() {
-            alert("✅ Free Trial Started! You have 2 free uses.");
+            alert("✅ Free Trial Started!\nYou now have 2 free transcriptions.");
             document.getElementById('upload-section').classList.remove('hidden');
         }
 
