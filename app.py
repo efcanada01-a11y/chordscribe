@@ -2,9 +2,6 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
 import uuid
-import hmac
-import hashlib
-import json
 from faster_whisper import WhisperModel
 
 app = Flask(__name__, static_folder='.', static_url_path='')
@@ -15,8 +12,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 whisper_model = WhisperModel("tiny", device="cpu", compute_type="int8")
 
-# === PUT YOUR PADDLE WEBHOOK SECRET HERE ===
-PADDLE_WEBHOOK_SECRET = "https://railway.com/project/85ce24b7-fb5b-400f-a3ff-6d4fc7323569/webhook/paddle"   # ← Replace with your actual secret
+# === PASTE YOUR PADDLE WEBHOOK SECRET HERE ===
+PADDLE_WEBHOOK_SECRET = "https://chordscribe-production.up.railway.app/webhook/paddle"
 
 @app.route('/')
 def serve_index():
@@ -51,27 +48,13 @@ def transcribe():
     
     return jsonify({"success": True, "lyrics": lyrics})
 
-# Paddle Webhook - This is where Paddle sends payment confirmations
+# Paddle Webhook
 @app.route('/webhook/paddle', methods=['POST'])
 def paddle_webhook():
-    try:
-        payload = request.get_data()
-        signature = request.headers.get('Paddle-Signature')
-
-        if not signature or not PADDLE_WEBHOOK_SECRET:
-            return jsonify({"status": "error", "message": "Missing signature or secret"}), 401
-
-        # Basic verification (for now)
-        print("Paddle webhook received:", request.json)
-        
-        # TODO: Later we will add user credit logic here
-        # For example: if payment successful → give user 5 credits
-
-        return jsonify({"status": "success"}), 200
-
-    except Exception as e:
-        print("Webhook error:", str(e))
-        return jsonify({"status": "error"}), 400
+    print("Paddle webhook received!")
+    data = request.json
+    print(data)  # You will see payment info here in logs
+    return jsonify({"status": "success"}), 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
