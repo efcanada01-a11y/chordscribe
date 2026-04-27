@@ -31,28 +31,28 @@
             </button>
         </div>
 
-        <p class="text-center text-emerald-300 text-2xl mb-16">Real AI Transcription • Smart Chords • Stems</p>
+        <p class="text-center text-emerald-300 text-2xl mb-16">Upload any song • Get lyrics, chords, MIDI & stems</p>
 
         <!-- Pricing + Free Trial -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-20">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-400">
                 <h3 class="text-2xl font-semibold text-emerald-400">FREE TRIAL</h3>
                 <p class="text-5xl font-bold my-6">2 Free Uses</p>
-                <p class="text-sm text-zinc-400 mb-6">No card needed</p>
+                <p class="text-sm text-zinc-400 mb-6">No card required</p>
                 <button onclick="startFreeTrial()" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Start Free Trial</button>
             </div>
 
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
                 <p class="text-6xl font-bold my-6 text-emerald-400">5 uses</p>
-                <button onclick="buyWithPaddle('credit_pack')" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Buy Now</button>
+                <button onclick="buyWithPaddle('credit_pack')" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Buy $5 Pack</button>
             </div>
 
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-500 relative">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">POPULAR</div>
-                <h3 class="text-2xl font-semibold">$9.99/month</h3>
-                <p class="text-emerald-400">Unlimited</p>
-                <button onclick="buyWithPaddle('monthly')" class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold">Subscribe</button>
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">MOST POPULAR</div>
+                <h3 class="text-2xl font-semibold">$9.99 / month</h3>
+                <p class="text-emerald-400 mt-2">Unlimited</p>
+                <button onclick="buyWithPaddle('monthly')" class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold">Subscribe Monthly</button>
             </div>
 
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
@@ -61,8 +61,8 @@
             </div>
         </div>
 
-        <!-- Upload Section -->
-        <div id="upload-section">
+        <!-- Upload Section - Hidden until Free Trial or Login -->
+        <div id="upload-section" class="hidden">
             <div class="bg-zinc-900/70 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
                 <i class="fa-solid fa-cloud-arrow-up text-8xl text-emerald-400 mb-8"></i>
                 <p class="text-4xl font-medium mb-3">Drop your song here</p>
@@ -79,11 +79,11 @@
             </div>
         </div>
 
-        <!-- Progress, Results, Stems, etc. -->
+        <!-- Progress -->
         <div id="progress-container" class="hidden mt-8">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
                 <div class="flex justify-between text-sm mb-3">
-                    <span class="text-emerald-400">AI is working...</span>
+                    <span class="text-emerald-400">AI is working on your song...</span>
                     <span id="progress-percent">0%</span>
                 </div>
                 <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
@@ -92,6 +92,7 @@
             </div>
         </div>
 
+        <!-- Results -->
         <div id="results" class="hidden mt-8 bg-zinc-900/80 backdrop-blur rounded-3xl p-10 border border-zinc-700">
             <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
             <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
@@ -151,7 +152,7 @@
     </div>
 
     <script>
-        // === CHANGE THIS TO YOUR ACTUAL PADDLE CLIENT TOKEN ===
+        // Paddle Setup - Use your actual Sandbox Client Token here
         Paddle.Setup({ token: "test_811cb112fcd59007853dbecf441" });
 
         function buyWithPaddle(plan) {
@@ -164,7 +165,7 @@
                 product: productId,
                 email: "test@chordscribe.com",
                 successCallback: function(data) {
-                    alert("✅ Payment Successful!\n\nYour account has been updated with credits.");
+                    alert("✅ Payment Successful!\n\nYour account has been updated.");
                 },
                 errorCallback: function(err) {
                     console.error(err);
@@ -174,11 +175,10 @@
         }
 
         function startFreeTrial() {
-            alert("✅ Free Trial Activated!\nYou have 2 free transcriptions.");
-            // You can add logic to track free uses later
+            alert("✅ Free Trial Started! You have 2 free uses.");
+            document.getElementById('upload-section').classList.remove('hidden');
         }
 
-        // Your existing working functions
         function handleFile(event) {
             const file = event.target.files[0];
             if (file) {
@@ -237,7 +237,11 @@
             const email = document.getElementById('email').value.trim() || "user@chordscribe.com";
             alert(`✅ Logged in as ${email}`);
             hideAuthModal();
+            document.getElementById('upload-section').classList.remove('hidden');
         }
+
+        // Hide upload initially
+        document.getElementById('upload-section').classList.add('hidden');
     </script>
 </body>
 </html>
