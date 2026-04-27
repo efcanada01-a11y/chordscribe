@@ -21,7 +21,6 @@
 </head>
 <body class="text-white min-h-screen">
     <div class="max-w-5xl mx-auto p-8">
-        <!-- Header -->
         <div class="flex justify-between items-center mb-12">
             <div class="flex items-center gap-4">
                 <span class="logo-guitar">🎸</span>
@@ -32,38 +31,38 @@
             </button>
         </div>
 
-        <p class="text-center text-emerald-300 text-2xl mb-16">Turn any song into lyrics, chords, MIDI & stems</p>
+        <p class="text-center text-emerald-300 text-2xl mb-16">Real AI Transcription • Smart Chords • Stems</p>
 
         <!-- Pricing + Free Trial -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-20">
-            <!-- Free Trial -->
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-400">
                 <h3 class="text-2xl font-semibold text-emerald-400">FREE TRIAL</h3>
                 <p class="text-5xl font-bold my-6">2 Free Uses</p>
-                <p class="text-sm text-zinc-400 mb-6">No credit card required</p>
+                <p class="text-sm text-zinc-400 mb-6">No card needed</p>
                 <button onclick="startFreeTrial()" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Start Free Trial</button>
             </div>
 
-            <!-- Paid Plans -->
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
                 <p class="text-6xl font-bold my-6 text-emerald-400">5 uses</p>
-                <button onclick="buyWithPaddle('credit_pack')" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Buy $5 Pack</button>
+                <button onclick="buyWithPaddle('credit_pack')" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Buy Now</button>
             </div>
+
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-500 relative">
-                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">MOST POPULAR</div>
-                <h3 class="text-2xl font-semibold">$9.99 / month</h3>
-                <p class="text-emerald-400 mt-2">Unlimited</p>
-                <button onclick="buyWithPaddle('monthly')" class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold">Subscribe Monthly</button>
+                <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">POPULAR</div>
+                <h3 class="text-2xl font-semibold">$9.99/month</h3>
+                <p class="text-emerald-400">Unlimited</p>
+                <button onclick="buyWithPaddle('monthly')" class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold">Subscribe</button>
             </div>
+
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$49 Lifetime</h3>
                 <button onclick="buyWithPaddle('lifetime')" class="emerald-btn w-full mt-16 py-5 rounded-3xl text-xl font-semibold">Buy Lifetime</button>
             </div>
         </div>
 
-        <!-- Upload Section (Hidden until Free Trial or Login) -->
-        <div id="upload-section" class="hidden">
+        <!-- Upload Section -->
+        <div id="upload-section">
             <div class="bg-zinc-900/70 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
                 <i class="fa-solid fa-cloud-arrow-up text-8xl text-emerald-400 mb-8"></i>
                 <p class="text-4xl font-medium mb-3">Drop your song here</p>
@@ -80,11 +79,11 @@
             </div>
         </div>
 
-        <!-- Progress, Results, etc. (same as before) -->
+        <!-- Progress, Results, Stems, etc. -->
         <div id="progress-container" class="hidden mt-8">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
                 <div class="flex justify-between text-sm mb-3">
-                    <span class="text-emerald-400">AI is working on your song...</span>
+                    <span class="text-emerald-400">AI is working...</span>
                     <span id="progress-percent">0%</span>
                 </div>
                 <div class="h-3 bg-zinc-800 rounded-full overflow-hidden">
@@ -152,7 +151,8 @@
     </div>
 
     <script>
-        Paddle.Setup({ token: "test_811cb112fcd59007853dbecf441" }); // Change to your real token
+        // === CHANGE THIS TO YOUR ACTUAL PADDLE CLIENT TOKEN ===
+        Paddle.Setup({ token: "test_811cb112fcd59007853dbecf441" });
 
         function buyWithPaddle(plan) {
             let productId = "";
@@ -164,34 +164,34 @@
                 product: productId,
                 email: "test@chordscribe.com",
                 successCallback: function(data) {
-                    alert("✅ Payment Successful!\n\nYour account has been updated.");
+                    alert("✅ Payment Successful!\n\nYour account has been updated with credits.");
+                },
+                errorCallback: function(err) {
+                    console.error(err);
+                    alert("Payment error. Please try again or contact support.");
                 }
             });
         }
 
         function startFreeTrial() {
-            alert("✅ Free Trial Started!\n\nYou have 2 free transcriptions.\n\nUpload your first song below.");
-            document.getElementById('upload-section').classList.remove('hidden');
+            alert("✅ Free Trial Activated!\nYou have 2 free transcriptions.");
+            // You can add logic to track free uses later
         }
 
-        // Rest of functions (upload, processing, etc.)
+        // Your existing working functions
         function handleFile(event) {
             const file = event.target.files[0];
             if (file) {
                 document.getElementById('file-info').classList.remove('hidden');
                 document.getElementById('filename').textContent = file.name;
-                document.getElementById('results').classList.add('hidden');
-                document.getElementById('progress-container').classList.add('hidden');
             }
         }
 
         async function startProcessing() {
-            // Same as your working version
             const btn = document.getElementById('process-btn');
             btn.textContent = "Processing...";
             btn.disabled = true;
             document.getElementById('progress-container').classList.remove('hidden');
-            document.getElementById('file-info').classList.add('hidden');
 
             const file = document.getElementById('file-input').files[0];
             const formData = new FormData();
@@ -237,7 +237,6 @@
             const email = document.getElementById('email').value.trim() || "user@chordscribe.com";
             alert(`✅ Logged in as ${email}`);
             hideAuthModal();
-            document.getElementById('upload-section').classList.remove('hidden'); // Unlock upload after login
         }
     </script>
 </body>
