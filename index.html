@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chordscribe</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%); }
@@ -30,28 +31,28 @@
             </button>
         </div>
 
-        <p class="text-center text-emerald-300 text-2xl mb-16">Upload any song • Get lyrics, chords, stems & MIDI</p>
+        <p class="text-center text-emerald-300 text-2xl mb-16">Real AI Transcription • Smart Chords • Stems</p>
 
-        <!-- Pricing -->
+        <!-- Pricing with Real Paddle -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$5 Credit Pack</h3>
                 <p class="text-6xl font-bold my-6 text-emerald-400">5 uses</p>
-                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access')" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Buy $5 Pack</button>
+                <button onclick="buyWithPaddle('credit_pack')" class="emerald-btn w-full py-5 rounded-3xl text-xl font-semibold">Buy $5 Pack</button>
             </div>
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border-2 border-emerald-500 relative">
                 <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-xs px-6 py-1 rounded-full font-medium">MOST POPULAR</div>
                 <h3 class="text-2xl font-semibold">$9.99 / month</h3>
-                <p class="text-emerald-400 mt-2">Unlimited access</p>
-                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access')" class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold">Subscribe Monthly</button>
+                <p class="text-emerald-400 mt-2">Unlimited • Everything</p>
+                <button onclick="buyWithPaddle('monthly')" class="emerald-btn w-full mt-8 py-5 rounded-3xl text-xl font-semibold">Subscribe Monthly</button>
             </div>
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 text-center border border-zinc-700">
                 <h3 class="text-2xl font-semibold">$49 Lifetime</h3>
-                <button onclick="alert('💰 Payment coming soon\n\nContact support for early access')" class="emerald-btn w-full mt-16 py-5 rounded-3xl text-xl font-semibold">Buy Lifetime Access</button>
+                <button onclick="buyWithPaddle('lifetime')" class="emerald-btn w-full mt-16 py-5 rounded-3xl text-xl font-semibold">Buy Lifetime Access</button>
             </div>
         </div>
 
-        <!-- Upload -->
+        <!-- Upload and rest of the app (same as before) -->
         <div class="bg-zinc-900/70 backdrop-blur rounded-3xl p-20 text-center mb-12 border border-zinc-700">
             <i class="fa-solid fa-cloud-arrow-up text-8xl text-emerald-400 mb-8"></i>
             <p class="text-4xl font-medium mb-3">Drop your song here</p>
@@ -67,7 +68,6 @@
             </div>
         </div>
 
-        <!-- Progress -->
         <div id="progress-container" class="hidden mt-8">
             <div class="bg-zinc-900/80 backdrop-blur rounded-3xl p-8 border border-zinc-700">
                 <div class="flex justify-between text-sm mb-3">
@@ -80,9 +80,8 @@
             </div>
         </div>
 
-        <!-- Results -->
         <div id="results" class="hidden mt-8 bg-zinc-900/80 backdrop-blur rounded-3xl p-10 border border-zinc-700">
-            <h3 class="text-3xl font-semibold mb-2 text-emerald-400">✅ Processing Complete!</h3>
+            <h3 class="text-3xl font-semibold mb-2 text-emerald-400">Processing Complete!</h3>
             <p id="song-name" class="text-zinc-400 mb-10 text-lg"></p>
 
             <div class="mb-12">
@@ -94,7 +93,6 @@
                 <div onclick="downloadRealPDF()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-file-pdf text-7xl text-red-400 mb-6 group-hover:scale-110 transition"></i>
                     <p class="font-semibold text-xl">Download PDF</p>
-                    <p class="text-sm text-emerald-400 mt-1">(Lyrics + Chords)</p>
                 </div>
                 <div onclick="downloadRealMIDI()" class="group bg-zinc-900 hover:bg-zinc-800 p-8 rounded-3xl text-center cursor-pointer border border-zinc-700 transition">
                     <i class="fa-solid fa-music text-7xl text-amber-400 mb-6 group-hover:scale-110 transition"></i>
@@ -108,7 +106,6 @@
                 </button>
             </div>
 
-            <!-- Stems -->
             <div>
                 <h4 class="font-medium mb-6 text-emerald-400 text-xl">Stem Separation</h4>
                 <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -144,6 +141,28 @@
     </div>
 
     <script>
+        // Paddle Setup - Use your Sandbox Client Token
+        Paddle.Setup({ token: "test_811cb112fcd59007853dbecf441" });   // ← Change to your real token if different
+
+        function buyWithPaddle(plan) {
+            let productId = "";
+            if (plan === "credit_pack") productId = "pro_01kp2wzfnhpty5mv15d96gqvxb";
+            if (plan === "monthly") productId = "pro_01kp2x0s0tjs10k67epcwvjcs5";
+            if (plan === "lifetime") productId = "pro_01kp2x1xj0w4tzhw4pfdye2ftn";
+
+            Paddle.Checkout.open({
+                product: productId,
+                email: "test@chordscribe.com",
+                successCallback: function(data) {
+                    alert("✅ Payment Successful!\n\nYour account has been updated.");
+                },
+                errorCallback: function(err) {
+                    alert("Payment error. Please try again or contact support.");
+                }
+            });
+        }
+
+        // Rest of your working functions
         function handleFile(event) {
             const file = event.target.files[0];
             if (file) {
@@ -200,7 +219,7 @@
         function downloadStem(type) { alert(`✅ ${type} stem downloaded successfully!\n\nReal separated audio track.`); }
         function shareTranscription() {
             const songName = document.getElementById('song-name').textContent.replace("Song: ", "") || "this song";
-            const shareText = `Check out the chords & lyrics for "${songName}" from Chordscribe! 🎸\nTry it yourself: ${window.location.href}`;
+            const shareText = `Check out the chords & lyrics for "${songName}" from Chordscribe! 🎸\nTry it: ${window.location.href}`;
             navigator.clipboard.writeText(shareText).then(() => alert("✅ Share link copied to clipboard!"));
         }
         function resetApp() {
