@@ -3,39 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chordscribe - Payment Test</title>
+    <title>Chordscribe - Payment Debug</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.paddle.com/paddle/paddle.js"></script>
 </head>
 <body class="bg-zinc-950 text-white p-8">
-    <div class="max-w-md mx-auto">
-        <h1 class="text-4xl font-bold text-center mb-8">🎸 Chordscribe Payment Test</h1>
+    <div class="max-w-lg mx-auto text-center">
+        <h1 class="text-4xl font-bold mb-8">🎸 Chordscribe Payment Debug</h1>
+        
+        <p class="mb-8 text-zinc-400">Token: test_614de31ad349f9ea66c253d0225</p>
 
-        <div class="space-y-6">
-            <button onclick="testPayment('credit_pack')" 
-                    class="w-full bg-emerald-600 hover:bg-emerald-700 py-6 rounded-3xl text-xl font-semibold">
+        <div class="space-y-4">
+            <button onclick="testPayment('credit_pack')" class="w-full bg-emerald-600 hover:bg-emerald-700 py-6 rounded-3xl text-xl font-semibold">
                 Test $5 Credit Pack
             </button>
-
-            <button onclick="testPayment('monthly')" 
-                    class="w-full bg-emerald-600 hover:bg-emerald-700 py-6 rounded-3xl text-xl font-semibold">
-                Test Monthly Subscription
+            <button onclick="testPayment('monthly')" class="w-full bg-emerald-600 hover:bg-emerald-700 py-6 rounded-3xl text-xl font-semibold">
+                Test Monthly $9.99
             </button>
-
-            <button onclick="testPayment('lifetime')" 
-                    class="w-full bg-emerald-600 hover:bg-emerald-700 py-6 rounded-3xl text-xl font-semibold">
-                Test $49 Lifetime
+            <button onclick="testPayment('lifetime')" class="w-full bg-emerald-600 hover:bg-emerald-700 py-6 rounded-3xl text-xl font-semibold">
+                Test Lifetime $49
             </button>
         </div>
 
-        <div class="mt-12 text-center text-sm text-zinc-400">
-            <p>Your token: test_614de31ad349f9ea66c253d0225</p>
-            <p>Product IDs are already set</p>
-        </div>
+        <div id="debug" class="mt-12 text-left bg-black p-6 rounded-xl text-sm font-mono text-emerald-300"></div>
     </div>
 
     <script>
-        // Your exact token
         Paddle.Setup({ token: "test_614de31ad349f9ea66c253d0225" });
 
         function testPayment(plan) {
@@ -44,18 +37,19 @@
             if (plan === "monthly") productId = "pro_01kp2x0s0tjs10k67epcwvjcs5";
             if (plan === "lifetime") productId = "pro_01kp2x1xj0w4tzhw4pfdye2ftn";
 
-            console.log("Opening Paddle checkout for product:", productId);
+            const debugDiv = document.getElementById('debug');
+            debugDiv.innerHTML = `Trying product: ${productId}<br>Opening checkout...`;
 
             Paddle.Checkout.open({
                 product: productId,
                 email: "test@chordscribe.com",
                 successCallback: function(data) {
-                    console.log("Success:", data);
-                    alert("✅ Payment Successful!\n\nYour account has been updated.");
+                    debugDiv.innerHTML += "<br><br>✅ SUCCESS!<br>" + JSON.stringify(data, null, 2);
+                    alert("Payment Successful!");
                 },
                 errorCallback: function(err) {
-                    console.error("Paddle Error:", err);
-                    alert("Payment Error:\n" + JSON.stringify(err, null, 2));
+                    debugDiv.innerHTML += "<br><br>❌ ERROR:<br>" + JSON.stringify(err, null, 2);
+                    alert("Payment Error - see debug below");
                 }
             });
         }
